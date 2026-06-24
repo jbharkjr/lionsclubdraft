@@ -1,20 +1,26 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import {
+  BarChart3,
   CheckCircle2,
+  ChevronRight,
   Clock3,
   Download,
   FileUp,
   ImagePlus,
+  Lock,
   Plus,
   RotateCcw,
   Save,
   Search,
+  Shield,
   Shuffle,
   Star,
   Trash2,
   Trophy,
   Undo2,
+  Unlock,
   Users,
+  Zap,
 } from 'lucide-react';
 
 const STORAGE_KEY = 'lions-club-draft-phase-2b';
@@ -187,6 +193,14 @@ function downloadText(filename, text) {
   URL.revokeObjectURL(url);
 }
 
+function teamStats(teams, members) {
+  return teams.map((team) => {
+    const roster = members.filter((member) => member.draftedTeamId === team.id);
+    const avg = roster.length ? Number(getAverageRating(roster)) : 0;
+    return { team, roster, avg };
+  });
+}
+
 export default function App() {
   const [state, setState] = useState(loadState);
   const [query, setQuery] = useState('');
@@ -216,7 +230,12 @@ export default function App() {
 
   const draftedCount = members.filter((member) => member.draftedTeamId).length;
   const currentTeam = getCurrentTeam(draftOrder, draftedCount);
+  const nextTeam = getCurrentTeam(draftOrder, draftedCount + 1);
   const round = Math.floor(draftedCount / teams.length) + 1;
+  const progress = members.length ? Math.round((draftedCount / members.length) * 100) : 0;
+  const recentPick = history.length ? history[history.length - 1] : null;
+  const recentMember = recentPick ? members.find((item) => item.id === recentPick.memberId) : null;
+  const recentTeam = recentPick ? teams.find((item) => item.id === recentPick.teamId) : null;
 
   const availableMembers = useMemo(() => {
     return members
@@ -224,6 +243,10 @@ export default function App() {
       .filter((member) => `${member.name} ${member.note} ${member.tags}`.toLowerCase().includes(query.toLowerCase()))
       .sort((a, b) => (sort === 'name' ? a.name.localeCompare(b.name) : b.rating - a.rating));
   }, [members, query, sort]);
+
+  const topRemaining = availableMembers.slice(0, 5);
+  const stats = teamStats(teams, members);
+  const strongest = [...stats].filter((item) => item.roster.length).sort((a, b) => b.avg - a.avg)[0];
 
   const draftMember = (memberId) => {
     if (!currentTeam || activeSeason.locked) return;
@@ -367,51 +390,84 @@ export default function App() {
   };
 
   return (
-    <main className="appShell">
-      <header className="hero">
-        <div>
-          <p className="eyebrow">Lions Club</p>
-          <h1>Team Draft Board</h1>
-          <p className="subtle">Season-based snake draft with CSV import, draft history, editable teams, notes, ratings, photos, and browser-saved progress.</p>
+    <main className="draftShell">
+      <section className="scoreboard">
+        <div className="scoreboardGlow" />
+        <div className="leagueMark">
+          <div className="crest"><Shield size={34} /></div>
+          <div>
+            <span>Lions Club Fantasy Draft</span>
+            <h1>{activeSeason.name}</h1>
+          </div>
         </div>
-        <div className="heroActions">
-          <button className="primaryBtn" type="button" onClick={randomizeOrder}><Shuffle size={18} /> Randomize Draft</button>
-          <button className="secondaryBtn" type="button" onClick={resetDraft}><RotateCcw size={17} /> Reset Picks</button>
+        <div className="scoreboardStats">
+          <StatPill label="Round" value={round} />
+          <StatPill label="Pick" value={draftedCount + 1} />
+          <StatPill label="Drafted" value={`${draftedCount}/${members.length}`} />
+          <StatPill label="Status" value={activeSeason.locked ? 'Locked' : 'Live'} />
         </div>
-      </header>
+      </section>
 
-      <section className="toolbar card">
-        <div className="seasonTools">
+      <section className={`onClockCard ${currentTeam?.color || 'blue'}`}>
+        <div className="onClockLabel"><Zap size={18} /> On The Clock</div>
+        <div className="onClockMain">
+          <div>
+            <h2>{currentTeam?.name || 'Draft Complete'}</h2>
+            <p>{currentTeam ? `${currentTeam.captain} / ${currentTeam.lieutenant}` : 'All members have been selected.'}</p>
+          </div>
+          <div className="clockRound">
+            <span>Round {round}</span>
+            <strong>Pick {draftedCount + 1}</strong>
+          </div>
+        </div>
+        <div className="draftProgress"><span style={{ width: `${progress}%` }} /></div>
+        <div className="tickerBar">
+          <span>Next: {nextTeam?.name || '—'}</span>
+          <span>Last: {recentMember ? `${recentMember.name} to ${recentTeam?.name}` : 'No picks yet'}</span>
+          <span>Top Team: {strongest ? `${strongest.team.name} ${strongest.avg.toFixed(1)}` : '—'}</span>
+        </div>
+      </section>
+
+      <section className="controlDeck">
+        <div className="seasonPanel glassCard">
           <label>Season<select value={state.activeSeasonId} onChange={(event) => setState((prev) => ({ ...prev, activeSeasonId: event.target.value }))}>{state.seasons.map((season) => <option key={season.id} value={season.id}>{season.name}</option>)}</select></label>
-          <label>Rename Active Season<input value={activeSeason.name} onChange={(event) => renameSeason(event.target.value)} /></label>
+          <label>Rename<input value={activeSeason.name} onChange={(event) => renameSeason(event.target.value)} /></label>
           <label>New Season<input value={newSeasonName} onChange={(event) => setNewSeasonName(event.target.value)} placeholder="2027 Draft" /></label>
-          <button className="secondaryBtn" type="button" onClick={addSeason}><Plus size={17} /> Add Season</button>
-          <button className="secondaryBtn" type="button" onClick={toggleLock}><Save size={17} /> {activeSeason.locked ? 'Unlock Draft' : 'Lock Draft'}</button>
+          <button className="utilityBtn" type="button" onClick={addSeason}><Plus size={17} /> Add</button>
         </div>
-        <div className="tabs">
-          <button type="button" className={activePanel === 'draft' ? 'active' : ''} onClick={() => setActivePanel('draft')}>Draft Board</button>
-          <button type="button" className={activePanel === 'teams' ? 'active' : ''} onClick={() => setActivePanel('teams')}>Team Setup</button>
-          <button type="button" className={activePanel === 'members' ? 'active' : ''} onClick={() => setActivePanel('members')}>Member Manager</button>
-          <button type="button" className={activePanel === 'history' ? 'active' : ''} onClick={() => setActivePanel('history')}>Draft History</button>
-          <button type="button" className={activePanel === 'analytics' ? 'active' : ''} onClick={() => setActivePanel('analytics')}>Analytics</button>
+
+        <div className="actionPanel glassCard">
+          <button className="goldBtn" type="button" onClick={randomizeOrder}><Shuffle size={18} /> Randomize</button>
+          <button className="utilityBtn" type="button" onClick={resetDraft}><RotateCcw size={17} /> Reset</button>
+          <button className="utilityBtn" type="button" onClick={undoLastPick}><Undo2 size={17} /> Undo</button>
+          <button className="utilityBtn" type="button" onClick={toggleLock}>{activeSeason.locked ? <Unlock size={17} /> : <Lock size={17} />} {activeSeason.locked ? 'Unlock' : 'Lock'}</button>
         </div>
       </section>
 
-      <section className="currentPick card">
-        <div>
-          <span className="label">Current Pick</span>
-          <h2>{currentTeam?.name}</h2>
-          <p>{currentTeam?.captain} / {currentTeam?.lieutenant}</p>
-        </div>
-        <div className="pickStats">
-          <strong>Round {round}</strong>
-          <span>Pick {draftedCount + 1}</span>
-          <small>{draftedCount} drafted / {members.length} total</small>
-        </div>
-        <button className="secondaryBtn" type="button" onClick={undoLastPick}><Undo2 size={17} /> Undo</button>
-      </section>
+      <nav className="draftTabs">
+        <button type="button" className={activePanel === 'draft' ? 'active' : ''} onClick={() => setActivePanel('draft')}>Draft Room</button>
+        <button type="button" className={activePanel === 'teams' ? 'active' : ''} onClick={() => setActivePanel('teams')}>Team Setup</button>
+        <button type="button" className={activePanel === 'members' ? 'active' : ''} onClick={() => setActivePanel('members')}>Member Manager</button>
+        <button type="button" className={activePanel === 'history' ? 'active' : ''} onClick={() => setActivePanel('history')}>Draft History</button>
+        <button type="button" className={activePanel === 'analytics' ? 'active' : ''} onClick={() => setActivePanel('analytics')}>Analytics</button>
+      </nav>
 
-      {activePanel === 'draft' && <DraftBoard members={members} teams={teams} draftOrder={draftOrder} availableMembers={availableMembers} query={query} setQuery={setQuery} sort={sort} setSort={setSort} updateMember={updateMember} draftMember={draftMember} locked={activeSeason.locked} />}
+      {activePanel === 'draft' && (
+        <DraftRoom
+          members={members}
+          teams={teams}
+          draftOrder={draftOrder}
+          availableMembers={availableMembers}
+          topRemaining={topRemaining}
+          query={query}
+          setQuery={setQuery}
+          sort={sort}
+          setSort={setSort}
+          updateMember={updateMember}
+          draftMember={draftMember}
+          locked={activeSeason.locked}
+        />
+      )}
       {activePanel === 'teams' && <TeamSetup teams={teams} updateTeam={updateTeam} />}
       {activePanel === 'members' && <MemberManager members={members} addMember={addMember} updateMember={updateMember} deleteMember={deleteMember} handleImport={handleImport} importRef={importRef} exportMembers={exportMembers} exportRosters={exportRosters} />}
       {activePanel === 'history' && <DraftHistory history={history} members={members} teams={teams} />}
@@ -420,52 +476,68 @@ export default function App() {
   );
 }
 
-function DraftBoard({ members, teams, draftOrder, availableMembers, query, setQuery, sort, setSort, updateMember, draftMember, locked }) {
+function StatPill({ label, value }) {
+  return <div className="statPill"><span>{label}</span><strong>{value}</strong></div>;
+}
+
+function DraftRoom({ members, teams, draftOrder, availableMembers, topRemaining, query, setQuery, sort, setSort, updateMember, draftMember, locked }) {
   return (
-    <section className="layoutGrid">
-      <div className="card memberPanel">
-        <div className="panelHeader"><h2>Available Members</h2><span>{availableMembers.length} left</span></div>
+    <section className="draftRoomGrid">
+      <aside className="prospectBoard glassCard">
+        <div className="panelTitle"><div><span>Prospects</span><h2>Available Members</h2></div><b>{availableMembers.length}</b></div>
         <div className="toolsRow">
           <label className="searchBox"><Search size={17} /><input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Search name, notes, or tags" /></label>
-          <select value={sort} onChange={(event) => setSort(event.target.value)}><option value="rating">Sort by Rating</option><option value="name">Sort by Name</option></select>
+          <select value={sort} onChange={(event) => setSort(event.target.value)}><option value="rating">Rating</option><option value="name">Name</option></select>
         </div>
         <div className="memberList">
-          {availableMembers.map((member) => (
-            <article className="memberCard" key={member.id}>
-              <div className="avatar">{member.photo ? <img src={member.photo} alt={member.name} /> : <ImagePlus size={22} />}</div>
-              <div className="memberInfo">
-                <input className="memberName" value={member.name} onChange={(event) => updateMember(member.id, 'name', event.target.value)} />
-                <textarea value={member.note} onChange={(event) => updateMember(member.id, 'note', event.target.value)} placeholder="Add note..." />
-                <div className="tagLine">{member.tags}</div>
-                <div className="memberMeta">
-                  <label><Star size={15} /><input type="number" min="0" max="10" step="0.1" value={member.rating} onChange={(event) => updateMember(member.id, 'rating', Number(event.target.value))} /></label>
-                  <button type="button" disabled={locked} onClick={() => draftMember(member.id)}><CheckCircle2 size={16} /> Draft</button>
-                </div>
-              </div>
-            </article>
-          ))}
+          {availableMembers.map((member) => <DraftMemberCard key={member.id} member={member} updateMember={updateMember} draftMember={draftMember} locked={locked} />)}
         </div>
-      </div>
+      </aside>
 
-      <div className="teamsPanel">
-        <div className="card orderCard">
-          <h2><Trophy size={20} /> Draft Order</h2>
-          {draftOrder.map((team, index) => <div className="orderRow" key={team.id}><span>{index + 1}</span><strong>{team.name}</strong></div>)}
+      <section className="centralBoard">
+        <div className="miniBoard glassCard">
+          <h3><Star size={18} /> Top Remaining</h3>
+          {topRemaining.map((member, index) => <div className="topProspect" key={member.id}><span>{index + 1}</span><strong>{member.name}</strong><b>{member.rating}</b></div>)}
         </div>
+        <div className="orderBoard glassCard">
+          <h3><Trophy size={18} /> Snake Order</h3>
+          <div className="orderStack">{draftOrder.map((team, index) => <div className={`orderChip ${team.color}`} key={team.id}><span>{index + 1}</span><strong>{team.name}</strong><ChevronRight size={15} /></div>)}</div>
+        </div>
+      </section>
+
+      <section className="teamWarRoom">
         <TeamGrid teams={teams} members={members} />
-      </div>
+      </section>
     </section>
+  );
+}
+
+function DraftMemberCard({ member, updateMember, draftMember, locked }) {
+  return (
+    <article className="draftCard">
+      <div className="avatar big">{member.photo ? <img src={member.photo} alt={member.name} /> : <ImagePlus size={26} />}</div>
+      <div className="memberInfo">
+        <input className="memberName" value={member.name} onChange={(event) => updateMember(member.id, 'name', event.target.value)} />
+        <div className="ratingBadge"><Star size={15} /> {member.rating}</div>
+        <textarea value={member.note} onChange={(event) => updateMember(member.id, 'note', event.target.value)} placeholder="Add note..." />
+        <div className="tagLine">{member.tags}</div>
+        <div className="memberMeta">
+          <label><span>Rating</span><input type="number" min="0" max="10" step="0.1" value={member.rating} onChange={(event) => updateMember(member.id, 'rating', Number(event.target.value))} /></label>
+          <button type="button" disabled={locked} onClick={() => draftMember(member.id)}><CheckCircle2 size={16} /> Draft</button>
+        </div>
+      </div>
+    </article>
   );
 }
 
 function TeamSetup({ teams, updateTeam }) {
   return (
-    <section className="card setupPanel">
-      <h2>Team Setup</h2>
+    <section className="glassCard setupPanel">
+      <div className="panelTitle"><div><span>Franchise Control</span><h2>Team Setup</h2></div></div>
       <p className="helperText">Edit team names, captains, lieutenants, and team colors. Draft order stays linked to these teams.</p>
       <div className="teamSetupGrid">
         {teams.map((team) => (
-          <article className="setupCard" key={team.id}>
+          <article className={`setupCard ${team.color}`} key={team.id}>
             <label>Team Name<input value={team.name} onChange={(event) => updateTeam(team.id, 'name', event.target.value)} /></label>
             <label>Captain<input value={team.captain} onChange={(event) => updateTeam(team.id, 'captain', event.target.value)} /></label>
             <label>Lt.<input value={team.lieutenant} onChange={(event) => updateTeam(team.id, 'lieutenant', event.target.value)} /></label>
@@ -479,15 +551,15 @@ function TeamSetup({ teams, updateTeam }) {
 
 function MemberManager({ members, addMember, updateMember, deleteMember, handleImport, importRef, exportMembers, exportRosters }) {
   return (
-    <section className="card setupPanel">
-      <div className="panelHeader managerHeader">
-        <h2>Member Manager</h2>
+    <section className="glassCard setupPanel">
+      <div className="panelTitle managerHeader">
+        <div><span>Roster Database</span><h2>Member Manager</h2></div>
         <div className="heroActions">
           <input ref={importRef} hidden type="file" accept=".csv,text/csv" onChange={handleImport} />
-          <button className="secondaryBtn" type="button" onClick={() => importRef.current?.click()}><FileUp size={17} /> Import CSV</button>
-          <button className="secondaryBtn" type="button" onClick={exportMembers}><Download size={17} /> Export Members</button>
-          <button className="secondaryBtn" type="button" onClick={exportRosters}><Download size={17} /> Export Rosters</button>
-          <button className="primaryBtn" type="button" onClick={addMember}><Plus size={17} /> Add Member</button>
+          <button className="utilityBtn" type="button" onClick={() => importRef.current?.click()}><FileUp size={17} /> Import CSV</button>
+          <button className="utilityBtn" type="button" onClick={exportMembers}><Download size={17} /> Members</button>
+          <button className="utilityBtn" type="button" onClick={exportRosters}><Download size={17} /> Rosters</button>
+          <button className="goldBtn" type="button" onClick={addMember}><Plus size={17} /> Add Member</button>
         </div>
       </div>
       <p className="helperText">CSV columns supported: Name, Rating, Notes, Photo, Tags. Import can replace or append members.</p>
@@ -510,8 +582,8 @@ function MemberManager({ members, addMember, updateMember, deleteMember, handleI
 function DraftHistory({ history, members, teams }) {
   const ordered = [...history].sort((a, b) => b.pickNumber - a.pickNumber);
   return (
-    <section className="card setupPanel">
-      <h2><Clock3 size={20} /> Draft History</h2>
+    <section className="glassCard setupPanel">
+      <div className="panelTitle"><div><span>Selection Feed</span><h2><Clock3 size={20} /> Draft History</h2></div></div>
       <p className="helperText">Most recent picks appear first.</p>
       <div className="historyList">
         {ordered.length === 0 && <p>No picks have been made yet.</p>}
@@ -526,17 +598,14 @@ function DraftHistory({ history, members, teams }) {
 }
 
 function Analytics({ teams, members }) {
-  const stats = teams.map((team) => {
-    const roster = members.filter((member) => member.draftedTeamId === team.id);
-    return { team, roster, avg: roster.length ? Number(getAverageRating(roster)) : 0 };
-  }).sort((a, b) => b.avg - a.avg);
+  const stats = teamStats(teams, members).sort((a, b) => b.avg - a.avg);
   return (
-    <section className="card setupPanel">
-      <h2>Team Analytics</h2>
+    <section className="glassCard setupPanel">
+      <div className="panelTitle"><div><span>Team Intelligence</span><h2><BarChart3 size={20} /> Analytics</h2></div></div>
       <p className="helperText">Ratings-based summary of drafted rosters.</p>
       <div className="analyticsGrid">
         {stats.map(({ team, roster, avg }) => (
-          <article className="analyticsCard" key={team.id}>
+          <article className={`analyticsCard ${team.color}`} key={team.id}>
             <div><strong>{team.name}</strong><span>{roster.length} members</span></div>
             <b>{roster.length ? avg.toFixed(1) : '—'}</b>
             <div className="meter"><span style={{ width: `${Math.min(avg * 10, 100)}%` }} /></div>
