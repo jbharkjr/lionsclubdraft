@@ -1,6 +1,9 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import {
   CheckCircle2,
+  Clock3,
+  Download,
+  FileUp,
   ImagePlus,
   Plus,
   RotateCcw,
@@ -8,12 +11,13 @@ import {
   Search,
   Shuffle,
   Star,
+  Trash2,
   Trophy,
   Undo2,
   Users,
 } from 'lucide-react';
 
-const STORAGE_KEY = 'lions-club-draft-phase-2a';
+const STORAGE_KEY = 'lions-club-draft-phase-2b';
 const COLORS = ['gold', 'blue', 'navy', 'gray'];
 
 function makeDefaultTeams() {
@@ -33,33 +37,46 @@ function makeDefaultMembers() {
     rating: Number((Math.random() * 4 + 5).toFixed(1)),
     note: index % 4 === 0 ? 'Good attendance / reliable helper' : '',
     photo: '',
+    tags: '',
     draftedTeamId: null,
     pickNumber: null,
   }));
 }
 
 function makeSeason(name = '2026 Draft') {
+  const teams = makeDefaultTeams();
   return {
     id: crypto.randomUUID?.() || `season-${Date.now()}`,
     name,
-    teams: makeDefaultTeams(),
-    draftOrder: makeDefaultTeams(),
+    teams,
+    draftOrder: teams,
     members: makeDefaultMembers(),
     history: [],
     locked: false,
   };
 }
 
+function normalizeState(parsed) {
+  if (!parsed?.seasons?.length) throw new Error('Invalid saved draft data');
+  return {
+    ...parsed,
+    seasons: parsed.seasons.map((season) => ({
+      ...season,
+      members: season.members.map((member) => ({ tags: '', photo: '', note: '', ...member })),
+      history: season.history || [],
+      locked: Boolean(season.locked),
+    })),
+  };
+}
+
 function loadState() {
   try {
-    const raw = localStorage.getItem(STORAGE_KEY);
+    const raw = localStorage.getItem(STORAGE_KEY) || localStorage.getItem('lions-club-draft-phase-2a');
     if (!raw) {
       const season = makeSeason();
       return { activeSeasonId: season.id, seasons: [season] };
     }
-    const parsed = JSON.parse(raw);
-    if (!parsed?.seasons?.length) throw new Error('Invalid saved draft data');
-    return parsed;
+    return normalizeState(JSON.parse(raw));
   } catch {
     const season = makeSeason();
     return { activeSeasonId: season.id, seasons: [season] };
@@ -87,12 +104,96 @@ function getAverageRating(roster) {
   return (roster.reduce((sum, member) => sum + Number(member.rating || 0), 0) / roster.length).toFixed(1);
 }
 
+function parseCsv(text) {
+  const rows = [];
+  let current = '';
+  let row = [];
+  let quoted = false;
+
+  for (let i = 0; i < text.length; i += 1) {
+    const char = text[i];
+    const next = text[i + 1];
+    if (char === '"' && quoted && next === '"') {
+      current += '"';
+      i += 1;
+    } else if (char === '"') {
+      quoted = !quoted;
+    } else if (char === ',' && !quoted) {
+      row.push(current.trim());
+      current = '';
+    } else if ((char === '\n' || char === '\r') && !quoted) {
+      if (current || row.length) {
+        row.push(current.trim());
+        rows.push(row);
+        row = [];
+        current = '';
+      }
+      if (char === '\r' && next === '\n') i += 1;
+    } else {
+      current += char;
+    }
+  }
+  if (current || row.length) {
+    row.push(current.trim());
+    rows.push(row);
+  }
+  return rows.filter((item) => item.some(Boolean));
+}
+
+function importMembersFromCsv(text) {
+  const rows = parseCsv(text);
+  if (!rows.length) return [];
+  const headers = rows[0].map((header) => header.toLowerCase().trim());
+  const hasHeader = headers.some((header) => ['name', 'member', 'rating', 'note', 'notes', 'photo', 'tags'].includes(header));
+  const dataRows = hasHeader ? rows.slice(1) : rows;
+
+  const indexFor = (...names) => {
+    const index = headers.findIndex((header) => names.includes(header));
+    return index >= 0 ? index : null;
+  };
+
+  const nameIndex = hasHeader ? indexFor('name', 'member', 'member name', 'full name') : 0;
+  const ratingIndex = hasHeader ? indexFor('rating', 'score') : 1;
+  const noteIndex = hasHeader ? indexFor('note', 'notes') : 2;
+  const photoIndex = hasHeader ? indexFor('photo', 'photo url', 'image', 'image url') : 3;
+  const tagsIndex = hasHeader ? indexFor('tags', 'tag') : 4;
+
+  return dataRows
+    .map((row, index) => ({
+      id: crypto.randomUUID?.() || `member-import-${Date.now()}-${index}`,
+      name: row[nameIndex ?? 0]?.trim() || '',
+      rating: Number(row[ratingIndex ?? -1]) || 5,
+      note: row[noteIndex ?? -1] || '',
+      photo: row[photoIndex ?? -1] || '',
+      tags: row[tagsIndex ?? -1] || '',
+      draftedTeamId: null,
+      pickNumber: null,
+    }))
+    .filter((member) => member.name);
+}
+
+function toCsvValue(value) {
+  const stringValue = String(value ?? '');
+  return /[",\n]/.test(stringValue) ? `"${stringValue.replaceAll('"', '""')}"` : stringValue;
+}
+
+function downloadText(filename, text) {
+  const blob = new Blob([text], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = filename;
+  link.click();
+  URL.revokeObjectURL(url);
+}
+
 export default function App() {
   const [state, setState] = useState(loadState);
   const [query, setQuery] = useState('');
   const [sort, setSort] = useState('rating');
   const [activePanel, setActivePanel] = useState('draft');
   const [newSeasonName, setNewSeasonName] = useState('');
+  const importRef = useRef(null);
 
   const activeSeason = state.seasons.find((season) => season.id === state.activeSeasonId) || state.seasons[0];
   const teams = activeSeason.teams;
@@ -120,7 +221,7 @@ export default function App() {
   const availableMembers = useMemo(() => {
     return members
       .filter((member) => !member.draftedTeamId)
-      .filter((member) => `${member.name} ${member.note}`.toLowerCase().includes(query.toLowerCase()))
+      .filter((member) => `${member.name} ${member.note} ${member.tags}`.toLowerCase().includes(query.toLowerCase()))
       .sort((a, b) => (sort === 'name' ? a.name.localeCompare(b.name) : b.rating - a.rating));
   }, [members, query, sort]);
 
@@ -132,7 +233,7 @@ export default function App() {
       members: season.members.map((member) => (
         member.id === memberId ? { ...member, draftedTeamId: currentTeam.id, pickNumber } : member
       )),
-      history: [...season.history, { memberId, teamId: currentTeam.id, pickNumber }],
+      history: [...season.history, { memberId, teamId: currentTeam.id, pickNumber, timestamp: new Date().toISOString() }],
     }));
   };
 
@@ -158,13 +259,19 @@ export default function App() {
     }));
   };
 
+  const deleteMember = (id) => {
+    if (!window.confirm('Delete this member from the active season?')) return;
+    updateSeason((season) => ({
+      ...season,
+      members: season.members.filter((member) => member.id !== id),
+      history: season.history.filter((pick) => pick.memberId !== id),
+    }));
+  };
+
   const updateTeam = (id, field, value) => {
     updateSeason((season) => {
       const teamsNext = season.teams.map((team) => (team.id === id ? { ...team, [field]: value } : team));
-      const draftOrderNext = season.draftOrder.map((team) => {
-        const updated = teamsNext.find((candidate) => candidate.id === team.id);
-        return updated || team;
-      });
+      const draftOrderNext = season.draftOrder.map((team) => teamsNext.find((candidate) => candidate.id === team.id) || team);
       return { ...season, teams: teamsNext, draftOrder: draftOrderNext };
     });
   };
@@ -215,11 +322,48 @@ export default function App() {
           rating: 5,
           note: '',
           photo: '',
+          tags: '',
           draftedTeamId: null,
           pickNumber: null,
         },
       ],
     }));
+  };
+
+  const handleImport = async (event) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+    const text = await file.text();
+    const imported = importMembersFromCsv(text);
+    if (!imported.length) {
+      window.alert('No valid members found. Use columns like Name, Rating, Notes, Photo, Tags.');
+      return;
+    }
+    const mode = window.confirm(`Import ${imported.length} members. Press OK to replace current members, or Cancel to append them.`);
+    updateSeason((season) => ({
+      ...season,
+      members: mode ? imported : [...season.members, ...imported],
+      history: [],
+    }));
+    event.target.value = '';
+  };
+
+  const exportMembers = () => {
+    const header = ['Name', 'Rating', 'Notes', 'Photo', 'Tags', 'Drafted Team', 'Pick Number'];
+    const lines = members.map((member) => {
+      const team = teams.find((item) => item.id === member.draftedTeamId);
+      return [member.name, member.rating, member.note, member.photo, member.tags, team?.name || '', member.pickNumber || ''].map(toCsvValue).join(',');
+    });
+    downloadText(`${activeSeason.name.replaceAll(' ', '-')}-members.csv`, [header.join(','), ...lines].join('\n'));
+  };
+
+  const exportRosters = () => {
+    const header = ['Team', 'Captain', 'Lt', 'Member', 'Rating', 'Pick Number', 'Notes', 'Tags'];
+    const lines = teams.flatMap((team) => members
+      .filter((member) => member.draftedTeamId === team.id)
+      .sort((a, b) => a.pickNumber - b.pickNumber)
+      .map((member) => [team.name, team.captain, team.lieutenant, member.name, member.rating, member.pickNumber, member.note, member.tags].map(toCsvValue).join(',')));
+    downloadText(`${activeSeason.name.replaceAll(' ', '-')}-rosters.csv`, [header.join(','), ...lines].join('\n'));
   };
 
   return (
@@ -228,7 +372,7 @@ export default function App() {
         <div>
           <p className="eyebrow">Lions Club</p>
           <h1>Team Draft Board</h1>
-          <p className="subtle">Season-based snake draft with editable teams, notes, ratings, and saved browser progress.</p>
+          <p className="subtle">Season-based snake draft with CSV import, draft history, editable teams, notes, ratings, photos, and browser-saved progress.</p>
         </div>
         <div className="heroActions">
           <button className="primaryBtn" type="button" onClick={randomizeOrder}><Shuffle size={18} /> Randomize Draft</button>
@@ -238,20 +382,9 @@ export default function App() {
 
       <section className="toolbar card">
         <div className="seasonTools">
-          <label>
-            Season
-            <select value={state.activeSeasonId} onChange={(event) => setState((prev) => ({ ...prev, activeSeasonId: event.target.value }))}>
-              {state.seasons.map((season) => <option key={season.id} value={season.id}>{season.name}</option>)}
-            </select>
-          </label>
-          <label>
-            Rename Active Season
-            <input value={activeSeason.name} onChange={(event) => renameSeason(event.target.value)} />
-          </label>
-          <label>
-            New Season
-            <input value={newSeasonName} onChange={(event) => setNewSeasonName(event.target.value)} placeholder="2027 Draft" />
-          </label>
+          <label>Season<select value={state.activeSeasonId} onChange={(event) => setState((prev) => ({ ...prev, activeSeasonId: event.target.value }))}>{state.seasons.map((season) => <option key={season.id} value={season.id}>{season.name}</option>)}</select></label>
+          <label>Rename Active Season<input value={activeSeason.name} onChange={(event) => renameSeason(event.target.value)} /></label>
+          <label>New Season<input value={newSeasonName} onChange={(event) => setNewSeasonName(event.target.value)} placeholder="2027 Draft" /></label>
           <button className="secondaryBtn" type="button" onClick={addSeason}><Plus size={17} /> Add Season</button>
           <button className="secondaryBtn" type="button" onClick={toggleLock}><Save size={17} /> {activeSeason.locked ? 'Unlock Draft' : 'Lock Draft'}</button>
         </div>
@@ -259,6 +392,8 @@ export default function App() {
           <button type="button" className={activePanel === 'draft' ? 'active' : ''} onClick={() => setActivePanel('draft')}>Draft Board</button>
           <button type="button" className={activePanel === 'teams' ? 'active' : ''} onClick={() => setActivePanel('teams')}>Team Setup</button>
           <button type="button" className={activePanel === 'members' ? 'active' : ''} onClick={() => setActivePanel('members')}>Member Manager</button>
+          <button type="button" className={activePanel === 'history' ? 'active' : ''} onClick={() => setActivePanel('history')}>Draft History</button>
+          <button type="button" className={activePanel === 'analytics' ? 'active' : ''} onClick={() => setActivePanel('analytics')}>Analytics</button>
         </div>
       </section>
 
@@ -276,78 +411,139 @@ export default function App() {
         <button className="secondaryBtn" type="button" onClick={undoLastPick}><Undo2 size={17} /> Undo</button>
       </section>
 
-      {activePanel === 'draft' && (
-        <section className="layoutGrid">
-          <div className="card memberPanel">
-            <div className="panelHeader">
-              <h2>Available Members</h2>
-              <span>{availableMembers.length} left</span>
-            </div>
-            <div className="toolsRow">
-              <label className="searchBox"><Search size={17} /><input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Search name or notes" /></label>
-              <select value={sort} onChange={(event) => setSort(event.target.value)}><option value="rating">Sort by Rating</option><option value="name">Sort by Name</option></select>
-            </div>
-            <div className="memberList">
-              {availableMembers.map((member) => (
-                <article className="memberCard" key={member.id}>
-                  <div className="avatar">{member.photo ? <img src={member.photo} alt={member.name} /> : <ImagePlus size={22} />}</div>
-                  <div className="memberInfo">
-                    <input className="memberName" value={member.name} onChange={(event) => updateMember(member.id, 'name', event.target.value)} />
-                    <textarea value={member.note} onChange={(event) => updateMember(member.id, 'note', event.target.value)} placeholder="Add note..." />
-                    <div className="memberMeta">
-                      <label><Star size={15} /><input type="number" min="0" max="10" step="0.1" value={member.rating} onChange={(event) => updateMember(member.id, 'rating', Number(event.target.value))} /></label>
-                      <button type="button" disabled={activeSeason.locked} onClick={() => draftMember(member.id)}><CheckCircle2 size={16} /> Draft</button>
-                    </div>
-                  </div>
-                </article>
-              ))}
-            </div>
-          </div>
-
-          <div className="teamsPanel">
-            <div className="card orderCard">
-              <h2><Trophy size={20} /> Draft Order</h2>
-              {draftOrder.map((team, index) => <div className="orderRow" key={team.id}><span>{index + 1}</span><strong>{team.name}</strong></div>)}
-            </div>
-            <TeamGrid teams={teams} members={members} />
-          </div>
-        </section>
-      )}
-
-      {activePanel === 'teams' && (
-        <section className="card setupPanel">
-          <h2>Team Setup</h2>
-          <p className="helperText">Edit team names, captains, lieutenants, and team colors. Draft order will stay linked to these teams.</p>
-          <div className="teamSetupGrid">
-            {teams.map((team) => (
-              <article className="setupCard" key={team.id}>
-                <label>Team Name<input value={team.name} onChange={(event) => updateTeam(team.id, 'name', event.target.value)} /></label>
-                <label>Captain<input value={team.captain} onChange={(event) => updateTeam(team.id, 'captain', event.target.value)} /></label>
-                <label>Lt.<input value={team.lieutenant} onChange={(event) => updateTeam(team.id, 'lieutenant', event.target.value)} /></label>
-                <label>Color<select value={team.color} onChange={(event) => updateTeam(team.id, 'color', event.target.value)}>{COLORS.map((color) => <option key={color} value={color}>{color}</option>)}</select></label>
-              </article>
-            ))}
-          </div>
-        </section>
-      )}
-
-      {activePanel === 'members' && (
-        <section className="card setupPanel">
-          <div className="panelHeader"><h2>Member Manager</h2><button className="primaryBtn" type="button" onClick={addMember}><Plus size={17} /> Add Member</button></div>
-          <p className="helperText">Temporary browser-saved member list. CSV import and Supabase database come next.</p>
-          <div className="memberManagerList">
-            {members.map((member) => (
-              <article className="managerRow" key={member.id}>
-                <input value={member.name} onChange={(event) => updateMember(member.id, 'name', event.target.value)} />
-                <input type="number" min="0" max="10" step="0.1" value={member.rating} onChange={(event) => updateMember(member.id, 'rating', Number(event.target.value))} />
-                <input value={member.photo} onChange={(event) => updateMember(member.id, 'photo', event.target.value)} placeholder="Photo URL" />
-                <textarea value={member.note} onChange={(event) => updateMember(member.id, 'note', event.target.value)} placeholder="Notes" />
-              </article>
-            ))}
-          </div>
-        </section>
-      )}
+      {activePanel === 'draft' && <DraftBoard members={members} teams={teams} draftOrder={draftOrder} availableMembers={availableMembers} query={query} setQuery={setQuery} sort={sort} setSort={setSort} updateMember={updateMember} draftMember={draftMember} locked={activeSeason.locked} />}
+      {activePanel === 'teams' && <TeamSetup teams={teams} updateTeam={updateTeam} />}
+      {activePanel === 'members' && <MemberManager members={members} addMember={addMember} updateMember={updateMember} deleteMember={deleteMember} handleImport={handleImport} importRef={importRef} exportMembers={exportMembers} exportRosters={exportRosters} />}
+      {activePanel === 'history' && <DraftHistory history={history} members={members} teams={teams} />}
+      {activePanel === 'analytics' && <Analytics teams={teams} members={members} />}
     </main>
+  );
+}
+
+function DraftBoard({ members, teams, draftOrder, availableMembers, query, setQuery, sort, setSort, updateMember, draftMember, locked }) {
+  return (
+    <section className="layoutGrid">
+      <div className="card memberPanel">
+        <div className="panelHeader"><h2>Available Members</h2><span>{availableMembers.length} left</span></div>
+        <div className="toolsRow">
+          <label className="searchBox"><Search size={17} /><input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Search name, notes, or tags" /></label>
+          <select value={sort} onChange={(event) => setSort(event.target.value)}><option value="rating">Sort by Rating</option><option value="name">Sort by Name</option></select>
+        </div>
+        <div className="memberList">
+          {availableMembers.map((member) => (
+            <article className="memberCard" key={member.id}>
+              <div className="avatar">{member.photo ? <img src={member.photo} alt={member.name} /> : <ImagePlus size={22} />}</div>
+              <div className="memberInfo">
+                <input className="memberName" value={member.name} onChange={(event) => updateMember(member.id, 'name', event.target.value)} />
+                <textarea value={member.note} onChange={(event) => updateMember(member.id, 'note', event.target.value)} placeholder="Add note..." />
+                <div className="tagLine">{member.tags}</div>
+                <div className="memberMeta">
+                  <label><Star size={15} /><input type="number" min="0" max="10" step="0.1" value={member.rating} onChange={(event) => updateMember(member.id, 'rating', Number(event.target.value))} /></label>
+                  <button type="button" disabled={locked} onClick={() => draftMember(member.id)}><CheckCircle2 size={16} /> Draft</button>
+                </div>
+              </div>
+            </article>
+          ))}
+        </div>
+      </div>
+
+      <div className="teamsPanel">
+        <div className="card orderCard">
+          <h2><Trophy size={20} /> Draft Order</h2>
+          {draftOrder.map((team, index) => <div className="orderRow" key={team.id}><span>{index + 1}</span><strong>{team.name}</strong></div>)}
+        </div>
+        <TeamGrid teams={teams} members={members} />
+      </div>
+    </section>
+  );
+}
+
+function TeamSetup({ teams, updateTeam }) {
+  return (
+    <section className="card setupPanel">
+      <h2>Team Setup</h2>
+      <p className="helperText">Edit team names, captains, lieutenants, and team colors. Draft order stays linked to these teams.</p>
+      <div className="teamSetupGrid">
+        {teams.map((team) => (
+          <article className="setupCard" key={team.id}>
+            <label>Team Name<input value={team.name} onChange={(event) => updateTeam(team.id, 'name', event.target.value)} /></label>
+            <label>Captain<input value={team.captain} onChange={(event) => updateTeam(team.id, 'captain', event.target.value)} /></label>
+            <label>Lt.<input value={team.lieutenant} onChange={(event) => updateTeam(team.id, 'lieutenant', event.target.value)} /></label>
+            <label>Color<select value={team.color} onChange={(event) => updateTeam(team.id, 'color', event.target.value)}>{COLORS.map((color) => <option key={color} value={color}>{color}</option>)}</select></label>
+          </article>
+        ))}
+      </div>
+    </section>
+  );
+}
+
+function MemberManager({ members, addMember, updateMember, deleteMember, handleImport, importRef, exportMembers, exportRosters }) {
+  return (
+    <section className="card setupPanel">
+      <div className="panelHeader managerHeader">
+        <h2>Member Manager</h2>
+        <div className="heroActions">
+          <input ref={importRef} hidden type="file" accept=".csv,text/csv" onChange={handleImport} />
+          <button className="secondaryBtn" type="button" onClick={() => importRef.current?.click()}><FileUp size={17} /> Import CSV</button>
+          <button className="secondaryBtn" type="button" onClick={exportMembers}><Download size={17} /> Export Members</button>
+          <button className="secondaryBtn" type="button" onClick={exportRosters}><Download size={17} /> Export Rosters</button>
+          <button className="primaryBtn" type="button" onClick={addMember}><Plus size={17} /> Add Member</button>
+        </div>
+      </div>
+      <p className="helperText">CSV columns supported: Name, Rating, Notes, Photo, Tags. Import can replace or append members.</p>
+      <div className="memberManagerList">
+        {members.map((member) => (
+          <article className="managerRow" key={member.id}>
+            <input value={member.name} onChange={(event) => updateMember(member.id, 'name', event.target.value)} />
+            <input type="number" min="0" max="10" step="0.1" value={member.rating} onChange={(event) => updateMember(member.id, 'rating', Number(event.target.value))} />
+            <input value={member.photo} onChange={(event) => updateMember(member.id, 'photo', event.target.value)} placeholder="Photo URL" />
+            <input value={member.tags} onChange={(event) => updateMember(member.id, 'tags', event.target.value)} placeholder="Tags" />
+            <textarea value={member.note} onChange={(event) => updateMember(member.id, 'note', event.target.value)} placeholder="Notes" />
+            <button className="dangerBtn" type="button" onClick={() => deleteMember(member.id)}><Trash2 size={16} /></button>
+          </article>
+        ))}
+      </div>
+    </section>
+  );
+}
+
+function DraftHistory({ history, members, teams }) {
+  const ordered = [...history].sort((a, b) => b.pickNumber - a.pickNumber);
+  return (
+    <section className="card setupPanel">
+      <h2><Clock3 size={20} /> Draft History</h2>
+      <p className="helperText">Most recent picks appear first.</p>
+      <div className="historyList">
+        {ordered.length === 0 && <p>No picks have been made yet.</p>}
+        {ordered.map((pick) => {
+          const member = members.find((item) => item.id === pick.memberId);
+          const team = teams.find((item) => item.id === pick.teamId);
+          return <div className="historyRow" key={`${pick.pickNumber}-${pick.memberId}`}><strong>Pick {pick.pickNumber}</strong><span>{team?.name}</span><span>{member?.name}</span><b>{member?.rating}</b></div>;
+        })}
+      </div>
+    </section>
+  );
+}
+
+function Analytics({ teams, members }) {
+  const stats = teams.map((team) => {
+    const roster = members.filter((member) => member.draftedTeamId === team.id);
+    return { team, roster, avg: roster.length ? Number(getAverageRating(roster)) : 0 };
+  }).sort((a, b) => b.avg - a.avg);
+  return (
+    <section className="card setupPanel">
+      <h2>Team Analytics</h2>
+      <p className="helperText">Ratings-based summary of drafted rosters.</p>
+      <div className="analyticsGrid">
+        {stats.map(({ team, roster, avg }) => (
+          <article className="analyticsCard" key={team.id}>
+            <div><strong>{team.name}</strong><span>{roster.length} members</span></div>
+            <b>{roster.length ? avg.toFixed(1) : '—'}</b>
+            <div className="meter"><span style={{ width: `${Math.min(avg * 10, 100)}%` }} /></div>
+          </article>
+        ))}
+      </div>
+    </section>
   );
 }
 
@@ -355,11 +551,8 @@ function TeamGrid({ teams, members }) {
   return (
     <div className="teamGrid">
       {teams.map((team) => {
-        const roster = members
-          .filter((member) => member.draftedTeamId === team.id)
-          .sort((a, b) => a.pickNumber - b.pickNumber);
+        const roster = members.filter((member) => member.draftedTeamId === team.id).sort((a, b) => a.pickNumber - b.pickNumber);
         const avg = getAverageRating(roster);
-
         return (
           <section className={`teamCard ${team.color}`} key={team.id}>
             <div className="teamTop"><h3>{team.name}</h3><span><Users size={14} /> {roster.length}</span></div>
