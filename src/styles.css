@@ -1251,3 +1251,17 @@ label { display: grid; gap: 7px; color: #b9c8dc; text-transform: uppercase; font
     text-align: left;
   }
 }
+
+.analyticsTeamNameButton {
+  width: fit-content;
+  border: 0;
+  padding: 0;
+  background: transparent;
+  color: #f8fafc;
+  font: inherit;
+  font-weight: 900;
+  text-align: left;
+  cursor: pointer;
+}
+
+.analyticsTeamNameButton:hover { color: #f2af00; }
