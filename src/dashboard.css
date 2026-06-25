@@ -236,3 +236,43 @@
     min-width: 15px;
   }
 }
+
+
+/* Dashboard available members scrolling + header removal */
+.dashboardDesktop {
+  padding-top: 28px;
+}
+
+.availableDashboard {
+  display: flex;
+  flex-direction: column;
+  min-height: 610px;
+}
+
+.availableDashboardList {
+  flex: 1;
+  min-height: 0;
+  max-height: 470px;
+  overflow-y: auto;
+  padding-right: 6px;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(242,175,0,.75) rgba(116,160,215,.16);
+}
+
+.availableDashboardList::-webkit-scrollbar {
+  width: 8px;
+}
+
+.availableDashboardList::-webkit-scrollbar-track {
+  background: rgba(116,160,215,.16);
+  border-radius: 999px;
+}
+
+.availableDashboardList::-webkit-scrollbar-thumb {
+  background: rgba(242,175,0,.75);
+  border-radius: 999px;
+}
+
+.availableDashboard .linkBtn {
+  flex: 0 0 auto;
+}
