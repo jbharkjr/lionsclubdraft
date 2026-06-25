@@ -8,11 +8,9 @@ export function Sidebar({ activePanel, setActivePanel, settingsOpen, setSettings
         <img
           className="clubLogo"
           src="/lions-logo.png"
-          alt="Lions Club logo"
-          onLoad={(event) => { event.currentTarget.nextElementSibling.style.display = 'none'; }}
+          alt="Lufkin Host Lions Club logo"
           onError={(event) => { event.currentTarget.style.display = 'none'; }}
         />
-        <div className="logoFallback"><div className="logoCircle">L</div></div>
         <span className="hostClubText">Lufkin Host<br />Lions Club</span>
       </div>
 
