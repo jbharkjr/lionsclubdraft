@@ -1,4 +1,4 @@
-import { Clock3, Search, Timer, UserRound, Users } from 'lucide-react';
+import { Clock3, Play, RotateCcw, Search, Timer, UserRound, Users } from 'lucide-react';
 import { getAverageRating, getTeamNumber } from '../utils/draftLogic.js';
 import { RecentPicks } from './RecentPicks.jsx';
 import { SummaryStrip } from './SummaryStrip.jsx';
@@ -116,6 +116,9 @@ export function Dashboard({
   timerMinutes,
   timerRemainder,
   timerPercent,
+  timerRunning,
+  setTimerRunning,
+  setTimerSeconds,
 }) {
   const currentLeadership = getLeadership(currentTeam);
 
@@ -134,6 +137,14 @@ export function Dashboard({
         <MetricCard icon={<Clock3 size={28} />} color="purple" label="On The Clock" value={currentTeam?.name || '—'} sub={currentLeadership} />
         <MetricCard icon={<Timer size={28} />} color="gold" label="Time Remaining" value={`${timerMinutes}:${timerRemainder}`}>
           <strong>{timerMinutes}:{timerRemainder}</strong>
+          <div className="dashboardTimerControls">
+            <button type="button" onClick={() => setTimerRunning((prev) => !prev)}>
+              <Play size={15} /> {timerRunning ? 'Pause' : 'Start'}
+            </button>
+            <button type="button" onClick={() => setTimerSeconds()}>
+              <RotateCcw size={15} /> Reset
+            </button>
+          </div>
           <div className="metricTimerBar"><span style={{ width: `${timerPercent}%` }} /></div>
         </MetricCard>
       </section>
