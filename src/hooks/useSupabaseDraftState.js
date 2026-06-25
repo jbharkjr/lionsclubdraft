@@ -26,6 +26,8 @@ export function useSupabaseDraftState() {
   const [remoteReady, setRemoteReady] = useState(false);
   const [syncStatus, setSyncStatus] = useState(supabase ? 'Connecting...' : 'Local only');
   const saveTimer = useRef(null);
+  const clientId = useRef(crypto.randomUUID?.() || `client-${Date.now()}-${Math.random()}`);
+  const applyingRemote = useRef(false);
 
   useEffect(() => {
     let cancelled = false;
@@ -54,15 +56,27 @@ export function useSupabaseDraftState() {
       }
 
       if (data?.data) {
+        applyingRemote.current = true;
         setState(normalizeState(data.data));
         setSyncStatus('Connected');
+        window.setTimeout(() => {
+          applyingRemote.current = false;
+        }, 0);
       } else {
         const localState = loadLocalState();
         setState(localState);
 
         const { error: insertError } = await supabase
           .from(SUPABASE_TABLE)
-          .upsert({ id: SUPABASE_ROW_ID, data: localState, updated_at: new Date().toISOString() });
+          .upsert({
+            id: SUPABASE_ROW_ID,
+            data: {
+              ...localState,
+              _lastClientId: clientId.current,
+              _lastSavedAt: new Date().toISOString(),
+            },
+            updated_at: new Date().toISOString(),
+          });
 
         setSyncStatus(insertError ? 'Supabase save error' : 'Connected');
       }
@@ -78,20 +92,67 @@ export function useSupabaseDraftState() {
   }, []);
 
   useEffect(() => {
+    if (!supabase) return undefined;
+
+    const channel = supabase
+      .channel('draft-app-state-live')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: SUPABASE_TABLE,
+          filter: `id=eq.${SUPABASE_ROW_ID}`,
+        },
+        (payload) => {
+          const remoteData = payload.new?.data;
+          if (!remoteData) return;
+          if (remoteData._lastClientId === clientId.current) return;
+
+          applyingRemote.current = true;
+          setState(normalizeState(remoteData));
+          setSyncStatus('Live update received');
+
+          window.setTimeout(() => {
+            applyingRemote.current = false;
+            setSyncStatus('Connected');
+          }, 600);
+        },
+      )
+      .subscribe((status) => {
+        if (status === 'SUBSCRIBED') setSyncStatus('Connected');
+      });
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, []);
+
+  useEffect(() => {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
 
-    if (!supabase || !remoteReady) return;
+    if (!supabase || !remoteReady || applyingRemote.current) return;
 
     clearTimeout(saveTimer.current);
     setSyncStatus('Saving...');
 
     saveTimer.current = setTimeout(async () => {
+      const payload = {
+        ...state,
+        _lastClientId: clientId.current,
+        _lastSavedAt: new Date().toISOString(),
+      };
+
       const { error } = await supabase
         .from(SUPABASE_TABLE)
-        .upsert({ id: SUPABASE_ROW_ID, data: state, updated_at: new Date().toISOString() });
+        .upsert({
+          id: SUPABASE_ROW_ID,
+          data: payload,
+          updated_at: new Date().toISOString(),
+        });
 
       setSyncStatus(error ? 'Supabase save error' : 'Connected');
-    }, 650);
+    }, 450);
   }, [state, remoteReady]);
 
   const forceSave = async () => {
@@ -104,9 +165,19 @@ export function useSupabaseDraftState() {
 
     setSyncStatus('Saving...');
 
+    const payload = {
+      ...state,
+      _lastClientId: clientId.current,
+      _lastSavedAt: new Date().toISOString(),
+    };
+
     const { error } = await supabase
       .from(SUPABASE_TABLE)
-      .upsert({ id: SUPABASE_ROW_ID, data: state, updated_at: new Date().toISOString() });
+      .upsert({
+        id: SUPABASE_ROW_ID,
+        data: payload,
+        updated_at: new Date().toISOString(),
+      });
 
     setSyncStatus(error ? 'Supabase save error' : 'Connected');
   };
