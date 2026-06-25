@@ -983,6 +983,7 @@ label { display: grid; gap: 7px; color: #b9c8dc; text-transform: uppercase; font
   text-overflow: ellipsis;
   white-space: nowrap;
   font-weight: 850;
+  color: #f8fbff;
 }
 
 .availableDraftRow b {
@@ -1025,7 +1026,7 @@ label { display: grid; gap: 7px; color: #b9c8dc; text-transform: uppercase; font
 
 .memberModalOverlay {
   align-items: center;
-  background: rgba(3, 10, 7, 0.74);
+  background: rgba(4, 12, 28, 0.76);
   backdrop-filter: blur(6px);
   display: flex;
   inset: 0;
@@ -1036,10 +1037,10 @@ label { display: grid; gap: 7px; color: #b9c8dc; text-transform: uppercase; font
 }
 
 .memberDraftModal {
-  background: linear-gradient(145deg, #10261c, #07120d);
-  border: 1px solid rgba(244, 186, 66, 0.4);
+  background: linear-gradient(145deg, #17366d, #071a3a);
+  border: 1px solid rgba(244, 186, 66, 0.36);
   border-radius: 22px;
-  box-shadow: 0 30px 80px rgba(0, 0, 0, 0.55);
+  box-shadow: 0 30px 80px rgba(0, 0, 0, 0.55), inset 0 1px 0 rgba(255, 255, 255, 0.08);
   color: #f7f3df;
   max-width: 520px;
   padding: 24px;
