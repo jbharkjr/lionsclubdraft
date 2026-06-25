@@ -114,7 +114,7 @@ function AvailableMembersDashboard({ availableMembers, query, setQuery, draftMem
           </div>
         ))}
       </div>
-      <button className="linkBtn" type="button" onClick={() => setActivePanel('members')}>View All Members →</button>
+      <button className="linkBtn" type="button" onClick={() => setActivePanel('availableDraftList')}>View All Members →</button>
     </section>
   );
 }
