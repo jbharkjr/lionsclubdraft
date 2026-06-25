@@ -1,3 +1,4 @@
+import { useMemo, useState } from 'react';
 import { Clock3, Play, RotateCcw, Search, Timer, UserRound, Users } from 'lucide-react';
 import { getAverageRating, getTeamNumber } from '../utils/draftLogic.js';
 import { RecentPicks } from './RecentPicks.jsx';
@@ -74,12 +75,37 @@ function TeamOverviewDashboard({ teams, members, setActivePanel }) {
 }
 
 function AvailableMembersDashboard({ availableMembers, query, setQuery, draftMember, locked, setActivePanel }) {
+  const [sortMode, setSortMode] = useState('name-asc');
+
+  const sortedMembers = useMemo(() => {
+    const getRating = (member) => Number.parseFloat(member.rating) || 0;
+    const getName = (member) => (member.name || '').toLowerCase();
+
+    return [...availableMembers].sort((a, b) => {
+      if (sortMode === 'rating-desc') return getRating(b) - getRating(a) || getName(a).localeCompare(getName(b));
+      if (sortMode === 'rating-asc') return getRating(a) - getRating(b) || getName(a).localeCompare(getName(b));
+      if (sortMode === 'name-desc') return getName(b).localeCompare(getName(a));
+      return getName(a).localeCompare(getName(b));
+    });
+  }, [availableMembers, sortMode]);
+
   return (
     <section className="dashboardPanel availableDashboard">
-      <h3>Available Members <small>(Un-drafted)</small></h3>
+      <div className="availableDashboardHeader">
+        <h3>Available Members <small>(Un-drafted)</small></h3>
+        <label className="dashboardSortControl">
+          <span>Sort</span>
+          <select value={sortMode} onChange={(event) => setSortMode(event.target.value)}>
+            <option value="name-asc">Name A-Z</option>
+            <option value="name-desc">Name Z-A</option>
+            <option value="rating-desc">Rating High-Low</option>
+            <option value="rating-asc">Rating Low-High</option>
+          </select>
+        </label>
+      </div>
       <label className="searchBox dashboardSearch"><Search size={17} /><input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Search members..." /></label>
       <div className="availableDashboardList">
-        {availableMembers.map((member, index) => (
+        {sortedMembers.map((member, index) => (
           <div key={member.id}>
             <span>{index + 1}</span>
             <b>{member.name}</b>
