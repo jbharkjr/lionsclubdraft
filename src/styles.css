@@ -871,3 +871,50 @@ label { display: grid; gap: 7px; color: #b9c8dc; text-transform: uppercase; font
     overflow: visible;
   }
 }
+
+.memberManagerList {
+  gap: 12px;
+}
+
+.memberManagerRow {
+  grid-template-columns: 54px minmax(160px, 1.1fr) minmax(170px, 1.2fr) 96px 130px auto;
+  align-items: center;
+}
+
+.memberManagerRow input,
+.memberManagerRow select {
+  min-width: 0;
+}
+
+.lockedMemberRow {
+  background: rgba(255,255,255,.035);
+  border-color: rgba(116,160,215,.16);
+}
+
+.lockedMemberRow input:disabled,
+.lockedMemberRow select:disabled {
+  opacity: .72;
+  cursor: not-allowed;
+}
+
+.memberRowActions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.memberRowActions button {
+  white-space: nowrap;
+}
+
+@media (max-width: 1200px) {
+  .memberManagerRow {
+    grid-template-columns: 54px 1fr;
+  }
+
+  .memberRowActions {
+    grid-column: 1 / -1;
+    justify-content: flex-start;
+  }
+}

@@ -98,7 +98,7 @@ export default function App() {
   const availableMembers = useMemo(() => {
     return members
       .filter((member) => !member.draftedTeamId)
-      .filter((member) => `${member.name} ${member.tags}`.toLowerCase().includes(query.toLowerCase()))
+      .filter((member) => member.name.toLowerCase().includes(query.toLowerCase()))
       .sort((a, b) => (sort === 'name' ? a.name.localeCompare(b.name) : Number(b.rating || 0) - Number(a.rating || 0)));
   }, [members, query, sort]);
 
@@ -354,7 +354,8 @@ export default function App() {
         {activePanel === 'teams' && <TeamSetup teams={teams} updateTeam={updateTeam} />}
         {activePanel === 'members' && (
           <MemberManager
-            availableMembers={availableMembers}
+            members={members}
+            teams={teams}
             query={query}
             setQuery={setQuery}
             sort={sort}
@@ -362,12 +363,10 @@ export default function App() {
             addMember={addMember}
             updateMember={updateMember}
             deleteMember={deleteMember}
-            draftMember={draftMember}
             handleImport={handleImport}
             importRef={importRef}
             exportMembers={exportMembers}
             exportRosters={exportRosters}
-            locked={activeSeason.locked}
           />
         )}
         {activePanel === 'history' && <DraftHistory history={history} members={members} teams={teams} />}
