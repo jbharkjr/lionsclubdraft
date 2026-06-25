@@ -198,6 +198,8 @@ export default function App() {
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [settingsTab, setSettingsTab] = useState('seasons');
   const [newSeasonName, setNewSeasonName] = useState('');
+  const [timerSeconds, setTimerSeconds] = useState(90);
+  const [timerRunning, setTimerRunning] = useState(true);
   const importRef = useRef(null);
   const saveTimer = useRef(null);
 
@@ -269,6 +271,23 @@ export default function App() {
   const round = Math.floor(draftedCount / Math.max(teams.length, 1)) + 1;
   const draftPercent = members.length ? Math.round((draftedCount / members.length) * 100) : 0;
   const totalRounds = Math.ceil(members.length / Math.max(teams.length, 1));
+
+  useEffect(() => {
+    setTimerSeconds(90);
+    setTimerRunning(true);
+  }, [draftedCount]);
+
+  useEffect(() => {
+    if (!timerRunning || activeSeason.locked) return undefined;
+    const interval = window.setInterval(() => {
+      setTimerSeconds((prev) => Math.max(prev - 1, 0));
+    }, 1000);
+    return () => window.clearInterval(interval);
+  }, [timerRunning, activeSeason.locked]);
+
+  const timerMinutes = Math.floor(timerSeconds / 60);
+  const timerRemainder = String(timerSeconds % 60).padStart(2, '0');
+  const timerPercent = Math.max(0, Math.min(100, (timerSeconds / 90) * 100));
 
   const availableMembers = useMemo(() => {
     return members
@@ -423,8 +442,11 @@ export default function App() {
     <div className="appFrame">
       <aside className="sideNav">
         <div className="logoBadge">
-          <div className="logoCircle">L</div>
-          <span>Lions<br />International</span>
+          <img className="clubLogo" src="/lions-logo.png" alt="Lions Club logo" onLoad={(event) => { event.currentTarget.nextElementSibling.style.display = 'none'; }} onError={(event) => { event.currentTarget.style.display = 'none'; }} />
+          <div className="logoFallback">
+            <div className="logoCircle">L</div>
+            <span>Lions<br />International</span>
+          </div>
         </div>
         <nav>
           <button className={activePanel === 'draft' ? 'active' : ''} onClick={() => setActivePanel('draft')}><Zap size={18} /> Draft Room</button>
@@ -468,9 +490,13 @@ export default function App() {
                   <div className="timerBox">
                     <span>Round {round}</span>
                     <small>Pick {draftedCount + 1}</small>
-                    <strong>1:23</strong>
+                    <strong>{timerMinutes}:{timerRemainder}</strong>
                     <em>Time Remaining</em>
-                    <div className="miniBar"><i /></div>
+                    <div className="timerControls">
+                      <button type="button" onClick={() => setTimerRunning((prev) => !prev)}>{timerRunning ? 'Pause' : 'Start'}</button>
+                      <button type="button" onClick={() => setTimerSeconds(90)}>Reset</button>
+                    </div>
+                    <div className="miniBar"><i style={{ width: `${timerPercent}%` }} /></div>
                   </div>
                 </div>
 
@@ -538,7 +564,12 @@ function SnakeOrder({ draftOrder }) {
         return (
           <div className="snakeRound" key={roundIndex}>
             <span>Round {roundIndex + 1}</span>
-            <div>{order.slice(0, 10).map((_, i) => <b key={i}>{i + 1}</b>)}</div>
+            <div>
+              {order.map((team) => {
+                const originalIndex = draftOrder.findIndex((draftTeam) => draftTeam.id === team.id) + 1;
+                return <b title={team.name} key={`${roundIndex}-${team.id}`}>{originalIndex}</b>;
+              })}
+            </div>
           </div>
         );
       })}
