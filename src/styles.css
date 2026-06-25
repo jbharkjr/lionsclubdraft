@@ -918,3 +918,88 @@ label { display: grid; gap: 7px; color: #b9c8dc; text-transform: uppercase; font
     justify-content: flex-start;
   }
 }
+
+.availableDraftListPage {
+  min-height: calc(100vh - 112px);
+}
+
+.availableDraftHeader {
+  align-items: flex-start;
+}
+
+.availableDraftHeader p {
+  margin: 6px 0 0;
+  color: #afbdd0;
+  text-transform: uppercase;
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.availableDraftTools {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.availableDraftTools select {
+  border: 1px solid rgba(116,160,215,.32);
+  background: rgba(2,18,38,.72);
+  color: #f8fbff;
+  border-radius: 9px;
+  padding: 9px 12px;
+  font-weight: 800;
+}
+
+.availableDraftTools .compactSearchBox {
+  flex: 0 0 260px;
+  margin: 0;
+  min-height: 40px;
+}
+
+.availableDraftColumns {
+  margin-top: 18px;
+  column-width: 230px;
+  column-gap: 14px;
+}
+
+.availableDraftRow {
+  break-inside: avoid;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 48px;
+  gap: 8px;
+  align-items: center;
+  margin: 0 0 7px;
+  padding: 7px 9px;
+  border: 1px solid rgba(116,160,215,.16);
+  border-radius: 8px;
+  background: rgba(3,17,38,.42);
+  min-height: 36px;
+}
+
+.availableDraftRow span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-weight: 850;
+}
+
+.availableDraftRow b {
+  color: #f2af00;
+  text-align: right;
+  font-weight: 1000;
+}
+
+@media (max-width: 800px) {
+  .availableDraftHeader,
+  .availableDraftTools {
+    display: grid;
+    justify-content: stretch;
+  }
+
+  .availableDraftTools .compactSearchBox {
+    flex-basis: auto;
+    width: 100%;
+  }
+}

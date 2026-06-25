@@ -1,5 +1,6 @@
 import { useMemo, useRef, useState } from 'react';
 import { Analytics } from './components/Analytics.jsx';
+import { AvailableDraftList } from './components/AvailableDraftList.jsx';
 import { Dashboard } from './components/Dashboard.jsx';
 import { DraftHistory } from './components/DraftHistory.jsx';
 import { MemberManager } from './components/MemberManager.jsx';
@@ -352,6 +353,8 @@ export default function App() {
         )}
 
         {activePanel === 'teams' && <TeamSetup teams={teams} updateTeam={updateTeam} />}
+        {activePanel === 'availableDraftList' && <AvailableDraftList members={members} />}
+
         {activePanel === 'members' && (
           <MemberManager
             members={members}
