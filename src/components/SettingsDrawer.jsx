@@ -20,6 +20,7 @@ export function SettingsDrawer({
   members,
   availableMembers,
   setDraftOrderPosition,
+  updateDraftSettings,
   assignMemberToTeam13,
   unassignPreassignedMember,
   close,
@@ -58,6 +59,8 @@ export function SettingsDrawer({
           <button className="secondaryBtn" onClick={forceSave}><Save size={17} /> Save Now</button>
           <p>Scores are blank until a member is drafted. Their 2026 score is assigned by the round they are drafted in.</p>
 
+          <DraftSettingsControls activeSeason={activeSeason} updateDraftSettings={updateDraftSettings} />
+
           <DraftOrderSetup teams={teams} draftOrder={draftOrder} setDraftOrderPosition={setDraftOrderPosition} />
 
           <Team13Preassign
@@ -72,6 +75,41 @@ export function SettingsDrawer({
 
       {settingsTab === 'prefs' && <div className="settingsStack"><p>Logo uploads and advanced preferences can be added later.</p></div>}
     </aside>
+  );
+}
+
+function DraftSettingsControls({ activeSeason, updateDraftSettings }) {
+  const timerSeconds = activeSeason.draftSettings?.timerSeconds ?? 90;
+  const manualRounds = activeSeason.draftSettings?.manualRounds ?? '';
+
+  return (
+    <section className="drawerSection">
+      <h3>Draft Timing & Rounds</h3>
+      <p>Leave rounds blank to calculate automatically from the number of live draft members divided by the 12 live draft teams.</p>
+
+      <label>
+        Pick Timer Seconds
+        <input
+          type="number"
+          min="5"
+          step="5"
+          value={timerSeconds}
+          onChange={(event) => updateDraftSettings('timerSeconds', Math.max(5, Number(event.target.value) || 90))}
+        />
+      </label>
+
+      <label>
+        Manual Number of Rounds
+        <input
+          type="number"
+          min="1"
+          step="1"
+          value={manualRounds}
+          placeholder="Auto"
+          onChange={(event) => updateDraftSettings('manualRounds', event.target.value ? Math.max(1, Number(event.target.value)) : '')}
+        />
+      </label>
+    </section>
   );
 }
 

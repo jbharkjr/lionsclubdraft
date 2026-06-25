@@ -1,4 +1,9 @@
 export function DraftSettings({ activeSeason, teams, liveDraftOrder, totalRounds }) {
+  const timerSeconds = Number(activeSeason.draftSettings?.timerSeconds || 90);
+  const timerLabel = timerSeconds >= 60
+    ? `${Math.floor(timerSeconds / 60)}:${String(timerSeconds % 60).padStart(2, '0')}`
+    : `${timerSeconds}s`;
+
   return (
     <section className="card sideCard">
       <h3>Draft Settings</h3>
@@ -8,6 +13,7 @@ export function DraftSettings({ activeSeason, teams, liveDraftOrder, totalRounds
         <p><span>Live Draft Teams</span><b>{liveDraftOrder.length}</b></p>
         <p><span>Rounds</span><b>{totalRounds || 1}</b></p>
         <p><span>Picks Per Round</span><b>{liveDraftOrder.length}</b></p>
+        <p><span>Pick Timer</span><b>{timerLabel}</b></p>
       </div>
     </section>
   );
