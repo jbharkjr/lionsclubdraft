@@ -7,7 +7,7 @@ export function Sidebar({ activePanel, setActivePanel, settingsOpen, setSettings
       <div className="logoBadge hostLogoBlock">
         <img
           className="clubLogo"
-          src="/lions-logo.png"
+          src="/images/lions-logo.png"
           alt="Lufkin Host Lions Club logo"
           onError={(event) => { event.currentTarget.style.display = 'none'; }}
         />

@@ -143,8 +143,8 @@ export function Dashboard({
           <DraftProgressCard round={round} totalRounds={totalRounds} draftPercent={draftPercent} draftedCount={draftedCount} liveDraftMemberCount={liveDraftMemberCount} />
           <RecentPicks picks={lastPicks} members={members} teams={teams} />
         </div>
-        <TeamOverviewDashboard teams={teams} members={members} setActivePanel={setActivePanel} />
         <AvailableMembersDashboard availableMembers={availableMembers} query={query} setQuery={setQuery} draftMember={draftMember} locked={locked} setActivePanel={setActivePanel} />
+        <TeamOverviewDashboard teams={teams} members={members} setActivePanel={setActivePanel} />
       </section>
 
       <SummaryStrip strongestTeam={strongestTeam} weakestTeam={weakestTeam} balancedTeam={balancedTeam} />
