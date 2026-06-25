@@ -1,4 +1,4 @@
-import { BarChart3, Clock3, Home, Settings, Users, Zap } from 'lucide-react';
+import { BarChart3, ClipboardList, Clock3, Home, Settings, Users, Zap } from 'lucide-react';
 import { supabase } from '../hooks/useSupabaseDraftState.js';
 
 export function Sidebar({ activePanel, setActivePanel, settingsOpen, setSettingsOpen, syncStatus }) {
@@ -7,7 +7,7 @@ export function Sidebar({ activePanel, setActivePanel, settingsOpen, setSettings
       <div className="logoBadge hostLogoBlock">
         <img
           className="clubLogo"
-          src="/images/lions-logo.png"
+          src="/lions-logo.png"
           alt="Lufkin Host Lions Club logo"
           onError={(event) => { event.currentTarget.style.display = 'none'; }}
         />
@@ -18,6 +18,7 @@ export function Sidebar({ activePanel, setActivePanel, settingsOpen, setSettings
         <button className={activePanel === 'draft' ? 'active' : ''} onClick={() => setActivePanel('draft')}><Home size={18} /> Dashboard</button>
         <button className={activePanel === 'draft' ? 'active' : ''} onClick={() => setActivePanel('draft')}><Zap size={18} /> Draft Room</button>
         <button className={activePanel === 'teams' ? 'active' : ''} onClick={() => setActivePanel('teams')}><Users size={18} /> Teams</button>
+        <button className={activePanel === 'availableDraftList' ? 'active' : ''} onClick={() => setActivePanel('availableDraftList')}><ClipboardList size={18} /> Available Draft List</button>
         <button className={activePanel === 'members' ? 'active' : ''} onClick={() => setActivePanel('members')}><Users size={18} /> Members</button>
         <button className={activePanel === 'history' ? 'active' : ''} onClick={() => setActivePanel('history')}><Clock3 size={18} /> Draft History</button>
         <button className={settingsOpen ? 'active' : ''} onClick={() => setSettingsOpen(true)}><Settings size={18} /> Settings</button>
