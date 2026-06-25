@@ -79,7 +79,7 @@ function AvailableMembersDashboard({ availableMembers, query, setQuery, draftMem
       <h3>Available Members <small>(Un-drafted)</small></h3>
       <label className="searchBox dashboardSearch"><Search size={17} /><input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Search members..." /></label>
       <div className="availableDashboardList">
-        {availableMembers.slice(0, 10).map((member, index) => (
+        {availableMembers.map((member, index) => (
           <div key={member.id}>
             <span>{index + 1}</span>
             <b>{member.name}</b>
@@ -124,13 +124,6 @@ export function Dashboard({
 
   return (
     <div className="desktopDraft dashboardDesktop">
-      <header className="dashboardHeader">
-        <div>
-          <h1>Dashboard</h1>
-          <p>Live Draft Overview</p>
-        </div>
-      </header>
-
       <section className="dashboardMetrics">
         <CurrentRoundOrderCard liveDraftOrder={liveDraftOrder} draftedCount={draftedCount} />
         <MetricCard icon={<UserRound size={28} />} color="green" label="Members" value={availableMembers.length} sub="Available" />
