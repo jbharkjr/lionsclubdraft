@@ -100,6 +100,20 @@ function getCurrentTeam(order, pickCount) {
   return round % 2 === 0 ? order[index] : order[order.length - 1 - index];
 }
 
+function getTeamNumber(team) {
+  const match = String(team?.name || '').match(/\d+/);
+  return match ? Number(match[0]) : null;
+}
+
+function isLiveDraftTeam(team) {
+  const number = getTeamNumber(team);
+  return number !== 13;
+}
+
+function getLiveDraftOrder(draftOrder) {
+  return draftOrder.filter(isLiveDraftTeam);
+}
+
 function scoreForRound(round) {
   if (!round) return '';
   return Math.max(1, 11 - Math.min(round, 10));
@@ -207,6 +221,7 @@ export default function App() {
   const teams = activeSeason.teams;
   const members = activeSeason.members;
   const draftOrder = activeSeason.draftOrder;
+  const liveDraftOrder = getLiveDraftOrder(draftOrder);
   const history = activeSeason.history;
 
   useEffect(() => {
@@ -267,10 +282,11 @@ export default function App() {
   };
 
   const draftedCount = members.filter((member) => member.pickNumber).length;
-  const currentTeam = getCurrentTeam(draftOrder, draftedCount);
-  const round = Math.floor(draftedCount / Math.max(teams.length, 1)) + 1;
-  const draftPercent = members.length ? Math.round((draftedCount / members.length) * 100) : 0;
-  const totalRounds = Math.ceil(members.length / Math.max(teams.length, 1));
+  const currentTeam = getCurrentTeam(liveDraftOrder, draftedCount);
+  const round = Math.floor(draftedCount / Math.max(liveDraftOrder.length, 1)) + 1;
+  const liveDraftMemberCount = members.filter((member) => !member.draftedTeamId || member.pickNumber).length;
+  const draftPercent = liveDraftMemberCount ? Math.round((draftedCount / liveDraftMemberCount) * 100) : 0;
+  const totalRounds = Math.ceil(liveDraftMemberCount / Math.max(liveDraftOrder.length, 1));
 
   useEffect(() => {
     setTimerSeconds(90);
@@ -311,7 +327,7 @@ export default function App() {
   const draftMember = (memberId) => {
     if (!currentTeam || activeSeason.locked) return;
     const pickNumber = draftedCount + 1;
-    const draftedRound = Math.floor(draftedCount / Math.max(teams.length, 1)) + 1;
+    const draftedRound = Math.floor(draftedCount / Math.max(liveDraftOrder.length, 1)) + 1;
     const rating = scoreForRound(draftedRound);
     updateSeason((season) => ({
       ...season,
@@ -367,13 +383,15 @@ export default function App() {
 
     updateSeason((season) => {
       const target = season.teams.find((team) => team.id === teamId);
-      if (!target) return season;
+      if (!target || !isLiveDraftTeam(target)) return season;
 
-      const withoutTarget = season.draftOrder.filter((team) => team.id !== teamId);
-      const next = [...withoutTarget];
-      next.splice(Math.max(0, Math.min(position - 1, next.length)), 0, target);
+      const liveOrder = season.draftOrder.filter(isLiveDraftTeam);
+      const nonLiveOrder = season.draftOrder.filter((team) => !isLiveDraftTeam(team));
+      const withoutTarget = liveOrder.filter((team) => team.id !== teamId);
+      const nextLive = [...withoutTarget];
+      nextLive.splice(Math.max(0, Math.min(position - 1, nextLive.length)), 0, target);
 
-      return { ...season, draftOrder: next };
+      return { ...season, draftOrder: [...nextLive, ...nonLiveOrder] };
     });
   };
 
@@ -407,7 +425,7 @@ export default function App() {
     if (history.length && !window.confirm('Randomizing will clear current picks for this season. Continue?')) return;
     updateSeason((season) => ({
       ...season,
-      draftOrder: shuffleTeams(season.teams),
+      draftOrder: [...shuffleTeams(season.teams.filter(isLiveDraftTeam)), ...season.teams.filter((team) => !isLiveDraftTeam(team))],
       members: season.members.map((member) => (
         member.pickNumber ? { ...member, draftedTeamId: null, pickNumber: null, draftedRound: null, rating: '' } : member
       )),
@@ -548,7 +566,7 @@ export default function App() {
                 </div>
 
                 <div className="progressPanel card">
-                  <div className="panelHeader"><h3>Draft Progress</h3><span>{draftedCount} of {members.length} picks</span></div>
+                  <div className="panelHeader"><h3>Draft Progress</h3><span>{draftedCount} of {liveDraftMemberCount} live picks</span></div>
                   <p>Round {round} of {totalRounds || 1} <b>{draftPercent}%</b></p>
                   <div className="roundGrid">
                     {Array.from({ length: Math.min(totalRounds || 1, 24) }, (_, i) => (
@@ -561,8 +579,8 @@ export default function App() {
               </div>
 
               <div className="rightColumn">
-                <SnakeOrder draftOrder={draftOrder} />
-                <DraftSettings activeSeason={activeSeason} teams={teams} totalRounds={totalRounds} />
+                <SnakeOrder draftOrder={liveDraftOrder} draftedCount={draftedCount} />
+                <DraftSettings activeSeason={activeSeason} teams={teams} liveDraftOrder={liveDraftOrder} totalRounds={totalRounds} />
               </div>
             </section>
 
@@ -595,7 +613,7 @@ export default function App() {
           forceSave={forceSave}
           settingsTab={settingsTab}
           setSettingsTab={setSettingsTab}
-          draftOrder={draftOrder}
+          draftOrder={liveDraftOrder}
           teams={teams}
           members={members}
           availableMembers={availableMembers}
@@ -609,20 +627,25 @@ export default function App() {
   );
 }
 
-function SnakeOrder({ draftOrder }) {
+function SnakeOrder({ draftOrder, draftedCount }) {
+  const currentRoundIndex = Math.floor(draftedCount / Math.max(draftOrder.length, 1));
+  const picksMadeInRound = draftedCount % Math.max(draftOrder.length, 1);
+  const roundsToShow = [currentRoundIndex, currentRoundIndex + 1, currentRoundIndex + 2];
+
   return (
     <section className="card sideCard">
       <h3>Snake Draft Order</h3>
-      {[0, 1, 2].map((roundIndex) => {
+      {roundsToShow.map((roundIndex) => {
         const order = roundIndex % 2 === 0 ? draftOrder : [...draftOrder].reverse();
+        const visibleOrder = roundIndex === currentRoundIndex ? order.slice(picksMadeInRound) : order;
+
         return (
           <div className="snakeRound" key={roundIndex}>
             <span>Round {roundIndex + 1}</span>
             <div>
-              {order.map((team) => {
-                const originalIndex = draftOrder.findIndex((draftTeam) => draftTeam.id === team.id) + 1;
-                return <b title={team.name} key={`${roundIndex}-${team.id}`}>{originalIndex}</b>;
-              })}
+              {visibleOrder.map((team) => (
+                <b title={team.name} key={`${roundIndex}-${team.id}`}>{getTeamNumber(team) || team.name}</b>
+              ))}
             </div>
           </div>
         );
@@ -631,16 +654,16 @@ function SnakeOrder({ draftOrder }) {
   );
 }
 
-function DraftSettings({ activeSeason, teams, totalRounds }) {
+function DraftSettings({ activeSeason, teams, liveDraftOrder, totalRounds }) {
   return (
     <section className="card sideCard">
       <h3>Draft Settings</h3>
       <div className="settingsRows">
         <p><span>Season</span><b>{activeSeason.name}</b></p>
         <p><span>Status</span><b>{activeSeason.locked ? 'Locked' : 'Active'}</b></p>
-        <p><span>Teams</span><b>{teams.length}</b></p>
+        <p><span>Live Draft Teams</span><b>{liveDraftOrder.length}</b></p>
         <p><span>Rounds</span><b>{totalRounds || 1}</b></p>
-        <p><span>Picks Per Round</span><b>{teams.length}</b></p>
+        <p><span>Picks Per Round</span><b>{liveDraftOrder.length}</b></p>
       </div>
     </section>
   );
@@ -774,6 +797,7 @@ function SettingsDrawer({ state, setState, activeSeason, newSeasonName, setNewSe
 
 
 function DraftOrderSetup({ teams, draftOrder, setDraftOrderPosition }) {
+  const liveTeams = teams.filter(isLiveDraftTeam);
   return (
     <section className="drawerSection">
       <h3>Initial Draft Order</h3>
@@ -784,7 +808,7 @@ function DraftOrderSetup({ teams, draftOrder, setDraftOrderPosition }) {
             <span>Pick {index + 1}</span>
             <strong>{team.name}</strong>
             <select value={index + 1} onChange={(event) => setDraftOrderPosition(team.id, Number(event.target.value))}>
-              {teams.map((_, pickIndex) => <option key={pickIndex + 1} value={pickIndex + 1}>Move to pick {pickIndex + 1}</option>)}
+              {liveTeams.map((_, pickIndex) => <option key={pickIndex + 1} value={pickIndex + 1}>Move to pick {pickIndex + 1}</option>)}
             </select>
           </div>
         ))}

@@ -386,3 +386,11 @@ label { display: grid; gap: 7px; color: #b9c8dc; text-transform: uppercase; font
     grid-template-columns: 1fr;
   }
 }
+
+.snakeRound div {
+  align-items: center;
+}
+
+.snakeRound b {
+  font-weight: 1000;
+}
