@@ -1167,3 +1167,87 @@ label { display: grid; gap: 7px; color: #b9c8dc; text-transform: uppercase; font
   background: rgba(255, 255, 255, 0.1);
   color: #f7f3df;
 }
+
+.teamOverviewNameButton {
+  background: transparent;
+  border: 0;
+  color: #f8fbff;
+  cursor: pointer;
+  font-weight: 800;
+  padding: 0;
+  text-align: left;
+}
+
+.teamOverviewNameButton:hover {
+  color: #f2af00;
+  text-decoration: underline;
+}
+
+.teamRosterModal {
+  max-width: 620px;
+  width: min(620px, 100%);
+}
+
+.memberDraftModalHeader p {
+  color: #dbe7ff;
+  font-size: 1.05rem;
+  font-weight: 850;
+  margin: 8px 0 0;
+}
+
+.teamRosterList {
+  display: grid;
+  gap: 9px;
+  margin-bottom: 24px;
+  max-height: min(54vh, 520px);
+  overflow: auto;
+  padding-right: 4px;
+}
+
+.teamRosterList div {
+  align-items: center;
+  background: rgba(255, 255, 255, 0.07);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 13px;
+  display: grid;
+  gap: 10px;
+  grid-template-columns: minmax(190px, 1fr) 120px 54px;
+  padding: 12px 14px;
+}
+
+.teamRosterList strong {
+  color: #fff;
+  font-size: 1.15rem;
+  font-weight: 950;
+}
+
+.teamRosterList span {
+  color: #d8c78d;
+  font-size: 0.9rem;
+  font-weight: 900;
+  text-transform: capitalize;
+}
+
+.teamRosterList b {
+  color: #f4ba42;
+  font-size: 1.1rem;
+  font-weight: 950;
+  text-align: right;
+}
+
+.emptyRosterMessage {
+  color: #dbe7ff;
+  font-size: 1.1rem;
+  font-weight: 850;
+  margin: 0 0 20px;
+}
+
+@media (max-width: 640px) {
+  .teamRosterList div {
+    grid-template-columns: 1fr;
+  }
+
+  .teamRosterList b {
+    text-align: left;
+  }
+}
