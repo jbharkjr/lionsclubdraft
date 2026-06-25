@@ -1009,3 +1009,130 @@ label { display: grid; gap: 7px; color: #b9c8dc; text-transform: uppercase; font
   opacity: .82;
   cursor: not-allowed;
 }
+
+.availableDraftRow {
+  appearance: none;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  cursor: pointer;
+  text-align: left;
+  width: 100%;
+}
+
+.availableDraftRow:hover {
+  border-color: rgba(244, 186, 66, 0.55);
+  background: rgba(244, 186, 66, 0.12);
+}
+
+.memberModalOverlay {
+  align-items: center;
+  background: rgba(3, 10, 7, 0.74);
+  backdrop-filter: blur(6px);
+  display: flex;
+  inset: 0;
+  justify-content: center;
+  padding: 22px;
+  position: fixed;
+  z-index: 80;
+}
+
+.memberDraftModal {
+  background: linear-gradient(145deg, #10261c, #07120d);
+  border: 1px solid rgba(244, 186, 66, 0.4);
+  border-radius: 22px;
+  box-shadow: 0 30px 80px rgba(0, 0, 0, 0.55);
+  color: #f7f3df;
+  max-width: 520px;
+  padding: 24px;
+  width: min(520px, 100%);
+}
+
+.memberDraftModalHeader {
+  align-items: flex-start;
+  display: flex;
+  gap: 16px;
+  justify-content: space-between;
+  margin-bottom: 20px;
+}
+
+.memberDraftModalHeader span,
+.memberDraftDetails span {
+  color: #d8c78d;
+  display: block;
+  font-size: 0.76rem;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  margin-bottom: 5px;
+  text-transform: uppercase;
+}
+
+.memberDraftModalHeader h2 {
+  font-size: clamp(2rem, 5vw, 3.2rem);
+  font-weight: 950;
+  letter-spacing: -0.04em;
+  line-height: 1;
+  margin: 0;
+}
+
+.modalCloseButton {
+  align-items: center;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 999px;
+  color: #f7f3df;
+  cursor: pointer;
+  display: inline-flex;
+  font-size: 1.7rem;
+  height: 38px;
+  justify-content: center;
+  line-height: 1;
+  width: 38px;
+}
+
+.memberDraftDetails {
+  display: grid;
+  gap: 12px;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  margin-bottom: 24px;
+}
+
+.memberDraftDetails div {
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 16px;
+  padding: 15px;
+}
+
+.memberDraftDetails strong {
+  color: #fff8d7;
+  font-size: 1.35rem;
+  font-weight: 950;
+}
+
+.memberDraftActions {
+  display: flex;
+  gap: 12px;
+  justify-content: flex-end;
+}
+
+.memberDraftActions button {
+  border: 0;
+  border-radius: 999px;
+  cursor: pointer;
+  font-weight: 900;
+  padding: 12px 24px;
+}
+
+.memberDraftActions .primaryButton {
+  background: #f4ba42;
+  color: #06120c;
+}
+
+.memberDraftActions .primaryButton:disabled {
+  cursor: not-allowed;
+  opacity: 0.45;
+}
+
+.memberDraftActions .secondaryButton {
+  background: rgba(255, 255, 255, 0.1);
+  color: #f7f3df;
+}

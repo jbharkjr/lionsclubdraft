@@ -400,7 +400,15 @@ export default function App() {
         )}
 
         {activePanel === 'teams' && <TeamSetup teams={teams} updateTeam={updateTeam} />}
-        {activePanel === 'availableDraftList' && <AvailableDraftList members={members} />}
+        {activePanel === 'availableDraftList' && (
+          <AvailableDraftList
+            members={members}
+            teams={teams}
+            currentTeam={currentTeam}
+            draftMember={draftMember}
+            locked={activeSeason.locked}
+          />
+        )}
 
         {activePanel === 'members' && (
           <MemberManager
