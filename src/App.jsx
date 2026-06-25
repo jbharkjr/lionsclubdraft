@@ -1,6 +1,31 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { createClient } from '@supabase/supabase-js';
 import { BarChart3, CheckCircle2, Clock3, Download, FileUp, ImagePlus, Lock, Plus, RotateCcw, Save, Search, Shuffle, Star, Trash2, Trophy, Undo2, Unlock, Users, Zap } from 'lucide-react';
+import {
+  BarChart3,
+  Bell,
+  CheckCircle2,
+  Clock3,
+  Download,
+  FileUp,
+  HelpCircle,
+  ImagePlus,
+  Lock,
+  Plus,
+  RotateCcw,
+  Save,
+  Search,
+  Settings,
+  Shuffle,
+  Star,
+  Trash2,
+  Trophy,
+  Undo2,
+  Unlock,
+  Users,
+  Zap,
+  X,
+} from 'lucide-react';
 
 const STORAGE_KEY = 'lions-club-draft-phase-2b';
 const TABLE = 'draft_app_state';
