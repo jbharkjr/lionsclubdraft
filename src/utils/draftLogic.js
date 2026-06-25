@@ -34,6 +34,10 @@ export function makeSeason(name = '2026 Draft') {
     members: makeDefaultMembers(),
     history: [],
     locked: false,
+    draftSettings: {
+      timerSeconds: 90,
+      manualRounds: '',
+    },
   };
 }
 
@@ -69,6 +73,11 @@ export function normalizeState(parsed) {
       })),
       history: season.history || [],
       locked: Boolean(season.locked),
+      draftSettings: {
+        timerSeconds: 90,
+        manualRounds: '',
+        ...(season.draftSettings || {}),
+      },
     };
   });
 
