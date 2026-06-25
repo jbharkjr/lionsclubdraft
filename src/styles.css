@@ -287,12 +287,9 @@ label { display: grid; gap: 7px; color: #b9c8dc; text-transform: uppercase; font
 }
 .historyRow {
   display: grid;
-  grid-template-columns: 90px 95px minmax(180px, 1fr) 44px;
+  grid-template-columns: 90px 95px minmax(180px, 1fr);
   gap: 10px;
   align-items: center;
-}
-.historyRow b {
-  text-align: right;
 }
 .analyticsCard { display: grid; gap: 8px; }
 .analyticsCard b { color: #f2af00; font-size: 28px; }
