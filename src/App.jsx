@@ -27,9 +27,9 @@ import {
 } from 'lucide-react';
 
 const STORAGE_KEY = 'lions-club-draft-phase-2b';
-const TABLE = 'draft_app_state';
-const ROW_ID = 'main';
-const COLORS = ['gold', 'blue', 'navy', 'gray'];
+const SUPABASE_TABLE = 'draft_app_state';
+const SUPABASE_ROW_ID = 'main';
+const COLORS = ['gold', 'blue', 'green', 'purple', 'red'];
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
 const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
 const supabase = supabaseUrl && supabaseAnonKey ? createClient(supabaseUrl, supabaseAnonKey) : null;
