@@ -1,18 +1,11 @@
 import { useMemo, useRef, useState } from 'react';
-import { AvailableMembersPanel } from './components/AvailableMembersPanel.jsx';
 import { Analytics } from './components/Analytics.jsx';
-import { ClockPanel } from './components/ClockPanel.jsx';
+import { Dashboard } from './components/Dashboard.jsx';
 import { DraftHistory } from './components/DraftHistory.jsx';
-import { DraftProgress } from './components/DraftProgress.jsx';
-import { DraftSettings } from './components/DraftSettings.jsx';
 import { MemberManager } from './components/MemberManager.jsx';
 import { MobileDraftPager } from './components/MobileDraftPager.jsx';
-import { RecentPicks } from './components/RecentPicks.jsx';
 import { SettingsDrawer } from './components/SettingsDrawer.jsx';
 import { Sidebar } from './components/Sidebar.jsx';
-import { SnakeOrder } from './components/SnakeOrder.jsx';
-import { SummaryStrip } from './components/SummaryStrip.jsx';
-import { TeamOverviewTable } from './components/TeamOverviewTable.jsx';
 import { TeamSetup } from './components/TeamSetup.jsx';
 import { TopBar } from './components/TopBar.jsx';
 import { useDraftTimer } from './hooks/useDraftTimer.js';
@@ -28,6 +21,7 @@ import {
   scoreForRound,
   shuffleTeams,
 } from './utils/draftLogic.js';
+import './dashboard.css';
 
 export default function App() {
   const { state, setState, syncStatus, forceSave } = useSupabaseDraftState();
@@ -63,6 +57,13 @@ export default function App() {
   const totalRounds = Number(activeSeason.draftSettings?.manualRounds) || autoTotalRounds;
   const timerDurationSeconds = Number(activeSeason.draftSettings?.timerSeconds) || 90;
   const lastPicks = [...history].sort((a, b) => b.pickNumber - a.pickNumber).slice(0, 4);
+
+  const updateSeason = (updater) => {
+    setState((prev) => ({
+      ...prev,
+      seasons: prev.seasons.map((season) => (season.id === prev.activeSeasonId ? updater(season) : season)),
+    }));
+  };
 
   const updateTimerState = (timer) => {
     updateSeason((season) => ({
@@ -110,13 +111,6 @@ export default function App() {
   const strongestTeam = draftedStats.length ? [...draftedStats].sort((a, b) => b.avg - a.avg)[0] : null;
   const weakestTeam = draftedStats.length ? [...draftedStats].sort((a, b) => a.avg - b.avg)[0] : null;
   const balancedTeam = draftedStats.length ? [...draftedStats].sort((a, b) => Math.abs(5 - a.avg) - Math.abs(5 - b.avg))[0] : null;
-
-  const updateSeason = (updater) => {
-    setState((prev) => ({
-      ...prev,
-      seasons: prev.seasons.map((season) => (season.id === prev.activeSeasonId ? updater(season) : season)),
-    }));
-  };
 
   const draftMember = (memberId) => {
     if (!currentTeam || activeSeason.locked) return;
@@ -298,7 +292,7 @@ export default function App() {
   };
 
   return (
-    <div className="appFrame">
+    <div className="appFrame dashboardShell">
       <Sidebar activePanel={activePanel} setActivePanel={setActivePanel} settingsOpen={settingsOpen} setSettingsOpen={setSettingsOpen} syncStatus={syncStatus} />
 
       <main className="mainStage">
@@ -331,28 +325,29 @@ export default function App() {
               activeSeason={activeSeason}
             />
 
-            <div className="desktopDraft">
-              <section className="dashboardGrid">
-                <div className="clockPanel">
-                  <span className="sectionTitle">On The Clock</span>
-                  <ClockPanel currentTeam={currentTeam} round={round} draftedCount={draftedCount} {...timer} />
-                  <DraftProgress draftedCount={draftedCount} liveDraftMemberCount={liveDraftMemberCount} round={round} totalRounds={totalRounds} draftPercent={draftPercent} />
-                  <RecentPicks picks={lastPicks} members={members} teams={teams} />
-                </div>
-
-                <div className="rightColumn">
-                  <SnakeOrder draftOrder={liveDraftOrder} draftedCount={draftedCount} />
-                  <DraftSettings activeSeason={activeSeason} teams={teams} liveDraftOrder={liveDraftOrder} totalRounds={totalRounds} />
-                </div>
-              </section>
-
-              <section className="splitBoard">
-                <AvailableMembersPanel availableMembers={availableMembers} query={query} setQuery={setQuery} draftMember={draftMember} locked={activeSeason.locked} setActivePanel={setActivePanel} />
-                <TeamOverviewTable teams={teams} members={members} totalRounds={totalRounds} />
-              </section>
-
-              <SummaryStrip strongestTeam={strongestTeam} weakestTeam={weakestTeam} balancedTeam={balancedTeam} />
-            </div>
+            <Dashboard
+              activeSeason={activeSeason}
+              teams={teams}
+              members={members}
+              liveDraftOrder={liveDraftOrder}
+              availableMembers={availableMembers}
+              query={query}
+              setQuery={setQuery}
+              draftMember={draftMember}
+              locked={activeSeason.locked}
+              setActivePanel={setActivePanel}
+              currentTeam={currentTeam}
+              round={round}
+              draftedCount={draftedCount}
+              liveDraftMemberCount={liveDraftMemberCount}
+              totalRounds={totalRounds}
+              draftPercent={draftPercent}
+              lastPicks={lastPicks}
+              strongestTeam={strongestTeam}
+              weakestTeam={weakestTeam}
+              balancedTeam={balancedTeam}
+              {...timer}
+            />
           </>
         )}
 

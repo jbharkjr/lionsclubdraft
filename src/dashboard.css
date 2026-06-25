@@ -1,4 +1,3 @@
-
 .dashboardShell { grid-template-columns: 330px 1fr; }
 .dashboardSideNav { padding: 28px 26px; }
 .hostLogoBlock { gap: 18px; padding-bottom: 28px; border-bottom: 1px solid rgba(116,160,215,.22); }
