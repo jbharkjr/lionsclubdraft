@@ -62,7 +62,14 @@ export default function App() {
   const totalRounds = Math.ceil(liveDraftMemberCount / Math.max(liveDraftOrder.length, 1));
   const lastPicks = [...history].sort((a, b) => b.pickNumber - a.pickNumber).slice(0, 4);
 
-  const timer = useDraftTimer(draftedCount, activeSeason.locked);
+  const updateTimerState = (timer) => {
+    updateSeason((season) => ({
+      ...season,
+      timer,
+    }));
+  };
+
+  const timer = useDraftTimer(draftedCount, activeSeason.locked, activeSeason.timer, updateTimerState);
 
   const availableMembers = useMemo(() => {
     return members
