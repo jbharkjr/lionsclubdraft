@@ -136,6 +136,52 @@ export default function App() {
     }));
   };
 
+
+  const updateMemberProfile = (id, profile) => {
+    updateSeason((season) => {
+      const existingMember = season.members.find((member) => member.id === id);
+      const nextTeamId = profile.draftedTeamId || null;
+      const nextRole = nextTeamId ? (profile.teamRole || '') : '';
+      const affectedTeamIds = new Set([existingMember?.draftedTeamId, nextTeamId].filter(Boolean));
+
+      const membersNext = season.members.map((member) => {
+        if (member.id === id) {
+          return {
+            ...member,
+            photo: profile.photo || '',
+            name: profile.name || '',
+            rating: profile.rating || '',
+            draftedTeamId: nextTeamId,
+            teamRole: nextRole,
+          };
+        }
+
+        if (nextRole && nextTeamId && member.draftedTeamId === nextTeamId && member.teamRole === nextRole) {
+          return { ...member, teamRole: '' };
+        }
+
+        return member;
+      });
+
+      const teamsNext = season.teams.map((team) => {
+        if (!affectedTeamIds.has(team.id)) return team;
+
+        const captain = membersNext.find((member) => member.draftedTeamId === team.id && member.teamRole === 'captain');
+        const lieutenant = membersNext.find((member) => member.draftedTeamId === team.id && member.teamRole === 'lieutenant');
+
+        return {
+          ...team,
+          captain: captain?.name || '',
+          lieutenant: lieutenant?.name || '',
+        };
+      });
+
+      const draftOrderNext = season.draftOrder.map((team) => teamsNext.find((candidate) => candidate.id === team.id) || team);
+
+      return { ...season, members: membersNext, teams: teamsNext, draftOrder: draftOrderNext };
+    });
+  };
+
   const deleteMember = (id) => {
     if (!window.confirm('Delete this member from the active season?')) return;
     updateSeason((season) => ({
@@ -204,6 +250,7 @@ export default function App() {
           note: '',
           photo: '',
           tags: '',
+          teamRole: '',
           draftedTeamId: null,
           pickNumber: null,
           draftedRound: null,
@@ -365,6 +412,7 @@ export default function App() {
             setSort={setSort}
             addMember={addMember}
             updateMember={updateMember}
+            updateMemberProfile={updateMemberProfile}
             deleteMember={deleteMember}
             handleImport={handleImport}
             importRef={importRef}
