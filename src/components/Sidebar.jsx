@@ -1,4 +1,3 @@
-
 import { BarChart3, Clock3, Home, Settings, Users, Zap } from 'lucide-react';
 import { supabase } from '../hooks/useSupabaseDraftState.js';
 

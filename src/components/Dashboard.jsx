@@ -1,4 +1,3 @@
-
 import { Clock3, Search, Timer, UserRound, Users } from 'lucide-react';
 import { getAverageRating, getTeamNumber } from '../utils/draftLogic.js';
 import { RecentPicks } from './RecentPicks.jsx';
@@ -95,7 +94,6 @@ function AvailableMembersDashboard({ availableMembers, query, setQuery, draftMem
 }
 
 export function Dashboard({
-  activeSeason,
   teams,
   members,
   liveDraftOrder,
