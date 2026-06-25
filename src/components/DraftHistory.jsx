@@ -9,7 +9,7 @@ export function DraftHistory({ history, members, teams }) {
         {ordered.map((pick) => {
           const member = members.find((item) => item.id === pick.memberId);
           const team = teams.find((item) => item.id === pick.teamId);
-          return <div className="historyRow" key={`${pick.pickNumber}-${pick.memberId}`}><strong>Pick {pick.pickNumber}</strong><span>{team?.name}</span><span>{member?.name}</span><b>{member?.rating || '—'}</b></div>;
+          return <div className="historyRow" key={`${pick.pickNumber}-${pick.memberId}`}><strong>Pick {pick.pickNumber}</strong><span>{team?.name}</span><span>{member?.name}</span></div>;
         })}
       </div>
     </section>
