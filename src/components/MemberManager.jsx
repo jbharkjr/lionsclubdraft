@@ -6,6 +6,7 @@ const normalizeMemberDraft = (member) => ({
   name: member.name || '',
   rating: member.rating || '',
   draftedTeamId: member.draftedTeamId || '',
+  teamRole: member.teamRole || '',
 });
 
 export function MemberManager({
@@ -17,6 +18,7 @@ export function MemberManager({
   setSort,
   addMember,
   updateMember,
+  updateMemberProfile,
   deleteMember,
   handleImport,
   importRef,
@@ -64,10 +66,7 @@ export function MemberManager({
 
   const saveEdit = (member) => {
     const draft = rowDrafts[member.id] || normalizeMemberDraft(member);
-    updateMember(member.id, 'photo', draft.photo || '');
-    updateMember(member.id, 'name', draft.name || '');
-    updateMember(member.id, 'rating', draft.rating || '');
-    updateMember(member.id, 'draftedTeamId', draft.draftedTeamId || null);
+    updateMemberProfile(member.id, draft);
     cancelEdit(member.id);
   };
 
@@ -77,7 +76,11 @@ export function MemberManager({
       updateDraft(member.id, field, value);
       return;
     }
-    updateMember(member.id, field, field === 'draftedTeamId' ? value || null : value);
+    const nextDraft = {
+      ...normalizeMemberDraft(member),
+      [field]: value,
+    };
+    updateMemberProfile(member.id, nextDraft);
   };
 
   return (
@@ -133,11 +136,22 @@ export function MemberManager({
                 value={values.draftedTeamId}
                 onChange={(event) => updateOpenMember(member, 'draftedTeamId', event.target.value)}
                 disabled={rowLocked}
+                title="Team Number"
               >
                 <option value="">No Team</option>
                 {teams.map((team, index) => (
                   <option key={team.id} value={team.id}>Team {index + 1}</option>
                 ))}
+              </select>
+              <select
+                value={values.teamRole}
+                onChange={(event) => updateOpenMember(member, 'teamRole', event.target.value)}
+                disabled={rowLocked || !values.draftedTeamId}
+                title="Team Role"
+              >
+                <option value="">Member</option>
+                <option value="captain">Captain</option>
+                <option value="lieutenant">Lieutenant</option>
               </select>
               <div className="memberRowActions">
                 {isDrafted && !isEditing && <button className="secondaryBtn" onClick={() => beginEdit(member)}><Pencil size={16} /> Edit</button>}
