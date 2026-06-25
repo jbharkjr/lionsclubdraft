@@ -1,0 +1,73 @@
+
+.dashboardShell { grid-template-columns: 330px 1fr; }
+.dashboardSideNav { padding: 28px 26px; }
+.hostLogoBlock { gap: 18px; padding-bottom: 28px; border-bottom: 1px solid rgba(116,160,215,.22); }
+.hostLogoBlock .clubLogo { width: 185px; }
+.hostLogoBlock .logoFallback { justify-items: center; }
+.hostLogoBlock .logoCircle { width: 170px; height: 170px; }
+.hostClubText { display: block; color: #f8fbff; font-size: 32px; line-height: 1.18; font-weight: 1000; text-align: center; text-transform: none; letter-spacing: 0; }
+.dashboardSideNav nav { gap: 13px; }
+.dashboardSideNav nav button { font-size: 24px; padding: 17px 22px; }
+.dashboardSideNav nav button svg { width: 28px; height: 28px; }
+.dashboardSideNav .syncPanel { padding: 20px; font-size: 18px; }
+.dashboardDesktop { padding: 38px 36px 28px; }
+.dashboardHeader { display: flex; justify-content: space-between; align-items: center; margin-bottom: 34px; }
+.dashboardHeader h1 { margin: 0 0 8px; font-size: 46px; line-height: 1; }
+.dashboardHeader p { margin: 0; color: #aebbd0; font-size: 27px; font-weight: 600; }
+.dashboardMetrics { display: grid; grid-template-columns: repeat(4, minmax(210px, 1fr)); gap: 22px; margin-bottom: 28px; }
+.dashboardMetricCard { min-height: 150px; border: 1px solid rgba(116,160,215,.24); border-radius: 16px; background: linear-gradient(180deg, rgba(8,42,82,.92), rgba(5,28,57,.86)); display: grid; grid-template-columns: 72px 1fr; align-items: center; gap: 22px; padding: 28px; box-shadow: 0 18px 42px rgba(0,0,0,.20); }
+.metricIcon { width: 72px; height: 72px; border-radius: 13px; display: grid; place-items: center; color: white; }
+.metricIcon.blue { background: linear-gradient(135deg, #0b5bd3, #1f76ff); }
+.metricIcon.green { background: linear-gradient(135deg, #14a957, #23cf75); }
+.metricIcon.purple { background: linear-gradient(135deg, #6b3ab6, #9b5cff); }
+.metricIcon.gold { background: linear-gradient(135deg, #e7a600, #ffd24d); color: #06162b; }
+.metricContent span { color: #aebbd0; display: block; text-transform: uppercase; font-weight: 900; font-size: 16px; }
+.metricContent strong { display: block; font-size: 36px; line-height: 1.05; margin: 5px 0; }
+.metricContent small { color: #c5d1df; font-size: 18px; }
+.orderMetric { grid-template-columns: 64px 1fr; }
+.miniOrderDots { display: flex; flex-wrap: wrap; gap: 6px; margin: 7px 0; }
+.miniOrderDots b { width: 27px; height: 27px; border-radius: 999px; display: grid; place-items: center; background: #2357bf; color: white; font-size: 13px; }
+.metricTimerBar { height: 13px; border-radius: 999px; overflow: hidden; background: rgba(116,160,215,.19); margin-top: 15px; }
+.metricTimerBar span { display: block; height: 100%; border-radius: inherit; background: linear-gradient(90deg, #f2af00, #ffe08a); }
+.dashboardMainGrid { display: grid; grid-template-columns: .85fr 1fr 1.18fr; gap: 22px; align-items: stretch; }
+.dashboardLeftStack { display: grid; grid-template-rows: 245px 1fr; gap: 22px; }
+.dashboardPanel { border: 1px solid rgba(116,160,215,.24); border-radius: 16px; background: linear-gradient(180deg, rgba(8,42,82,.92), rgba(5,28,57,.86)); padding: 28px; box-shadow: 0 18px 42px rgba(0,0,0,.18); }
+.dashboardPanel h3 { margin: 0 0 20px; font-size: 25px; text-transform: uppercase; color: #f8fbff; }
+.dashboardPanel h3 small { color: #c8d4e3; font-size: .78em; }
+.compactPanel { min-height: 245px; }
+.progressLine { display: flex; justify-content: space-between; align-items: center; font-size: 22px; margin: 28px 0 18px; }
+.progressLine b { color: #4f8cff; }
+.dashboardProgress { height: 18px; border-radius: 999px; background: rgba(116,160,215,.2); overflow: hidden; }
+.dashboardProgress span { display: block; height: 100%; border-radius: inherit; background: linear-gradient(90deg, #f2af00, #ffe08a); }
+.compactPanel p { margin: 22px 0 0; color: #c7d2e1; font-size: 21px; }
+.dashboardDesktop .recentPanel { padding: 28px; }
+.dashboardDesktop .recentPanel h3 { color: #f8fbff; font-size: 25px; }
+.dashboardDesktop .recentGrid { grid-template-columns: 1fr; }
+.teamOverviewDashboard, .availableDashboard { min-height: 610px; }
+.dashboardTeamList { display: grid; gap: 0; border-top: 1px solid rgba(116,160,215,.18); padding-top: 14px; }
+.dashboardTeamList div { display: grid; grid-template-columns: 90px 1fr 45px; gap: 14px; align-items: center; padding: 8px 0; font-size: 20px; }
+.dashboardTeamList b { font-weight: 500; }
+.dashboardTeamList strong { text-align: right; }
+.availableDashboard .dashboardSearch { margin: 0 0 18px; height: 54px; }
+.availableDashboardList { display: grid; border-top: 1px solid rgba(116,160,215,.18); }
+.availableDashboardList div { display: grid; grid-template-columns: 40px 1fr 45px 80px; gap: 12px; align-items: center; min-height: 38px; border-bottom: 1px solid rgba(116,160,215,.14); font-size: 17px; }
+.availableDashboardList strong { text-align: center; }
+.availableDashboardList button { border: 0; border-radius: 8px; background: linear-gradient(135deg, #f2af00, #ffd35a); color: #06162b; font-weight: 1000; padding: 6px 10px; }
+.dashboardDesktop .linkBtn { font-size: 18px; margin-top: 18px; }
+.dashboardDesktop .summaryStrip { margin-top: 26px; }
+@media (max-width: 1250px) {
+  .dashboardShell { grid-template-columns: 260px 1fr; }
+  .dashboardMetrics, .dashboardMainGrid { grid-template-columns: 1fr; }
+  .dashboardLeftStack { grid-template-rows: auto auto; }
+}
+@media (max-width: 800px) {
+  .dashboardShell { grid-template-columns: 1fr; }
+  .dashboardSideNav { padding: 7px 8px; }
+  .hostClubText { display: none; }
+  .hostLogoBlock { padding-bottom: 0; border-bottom: 0; }
+  .hostLogoBlock .clubLogo { width: 44px; }
+  .hostLogoBlock .logoCircle { width: 42px; height: 42px; }
+  .dashboardSideNav nav button { font-size: 13px; padding: 8px 9px; }
+  .dashboardSideNav nav button svg { width: 15px; height: 15px; }
+  .dashboardDesktop { display: none; }
+}
