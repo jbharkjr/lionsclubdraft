@@ -114,12 +114,6 @@ export function MemberManager({
             <article className={`memberCard memberManagerRow ${rowLocked ? 'lockedMemberRow' : ''}`} key={member.id}>
               <div className="memberAvatar">{values.photo ? <img src={values.photo} alt={values.name} /> : <ImagePlus size={24} />}</div>
               <input
-                value={values.photo}
-                onChange={(event) => updateOpenMember(member, 'photo', event.target.value)}
-                placeholder="Picture URL"
-                disabled={rowLocked}
-              />
-              <input
                 className="memberName"
                 value={values.name}
                 onChange={(event) => updateOpenMember(member, 'name', event.target.value)}
