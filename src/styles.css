@@ -751,3 +751,82 @@ label { display: grid; gap: 7px; color: #b9c8dc; text-transform: uppercase; font
     overflow: auto;
   }
 }
+
+
+/* Mobile viewport/bottom-toolbar cleanup */
+@media (max-width: 800px) {
+  html,
+  body,
+  #root {
+    height: 100%;
+    min-height: 100%;
+  }
+
+  body {
+    overflow: hidden;
+  }
+
+  .appFrame {
+    height: 100dvh;
+    max-height: 100dvh;
+  }
+
+  .sideNav {
+    min-height: 58px;
+  }
+
+  .topBar {
+    min-height: 44px;
+  }
+
+  .mobileDraftPager {
+    height: calc(100dvh - 104px);
+    padding-bottom: max(10px, env(safe-area-inset-bottom));
+  }
+
+  .mobilePage {
+    min-height: 0;
+    overflow: hidden;
+    padding-bottom: max(16px, env(safe-area-inset-bottom));
+  }
+
+  .mobileProgressPage {
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    padding-bottom: max(105px, calc(env(safe-area-inset-bottom) + 78px));
+  }
+
+  .mobileMembersPage .splitPanel {
+    min-height: 0;
+    padding-bottom: max(90px, calc(env(safe-area-inset-bottom) + 72px));
+  }
+
+  .mobileMembersPage .availableTable {
+    height: calc(100dvh - 260px);
+    max-height: none;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    padding-bottom: max(95px, calc(env(safe-area-inset-bottom) + 74px));
+  }
+
+  .mobileSettingsPage {
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    padding-bottom: max(105px, calc(env(safe-area-inset-bottom) + 78px));
+  }
+
+  .mobileSettingsPage .teamTable {
+    height: auto;
+    max-height: calc(100dvh - 300px);
+    overflow-y: auto;
+    padding-bottom: max(80px, calc(env(safe-area-inset-bottom) + 60px));
+  }
+
+  .mobileClockPage {
+    padding-bottom: max(80px, calc(env(safe-area-inset-bottom) + 58px));
+  }
+
+  .mobileOnClock {
+    min-height: 0;
+  }
+}
