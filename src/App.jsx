@@ -266,7 +266,7 @@ export default function App() {
     setState((prev) => ({ ...prev, seasons: prev.seasons.map((season) => (season.id === prev.activeSeasonId ? updater(season) : season)) }));
   };
 
-  const draftedCount = members.filter((member) => member.draftedTeamId).length;
+  const draftedCount = members.filter((member) => member.pickNumber).length;
   const currentTeam = getCurrentTeam(draftOrder, draftedCount);
   const round = Math.floor(draftedCount / Math.max(teams.length, 1)) + 1;
   const draftPercent = members.length ? Math.round((draftedCount / members.length) * 100) : 0;
@@ -359,13 +359,58 @@ export default function App() {
     });
   };
 
+  const setDraftOrderPosition = (teamId, position) => {
+    if (activeSeason.locked || history.length) {
+      window.alert('Draft order can only be changed before draft picks begin and while the draft is unlocked.');
+      return;
+    }
+
+    updateSeason((season) => {
+      const target = season.teams.find((team) => team.id === teamId);
+      if (!target) return season;
+
+      const withoutTarget = season.draftOrder.filter((team) => team.id !== teamId);
+      const next = [...withoutTarget];
+      next.splice(Math.max(0, Math.min(position - 1, next.length)), 0, target);
+
+      return { ...season, draftOrder: next };
+    });
+  };
+
+  const assignMemberToTeam13 = (memberId) => {
+    const team13 = teams[12];
+    if (!team13) return;
+
+    updateSeason((season) => ({
+      ...season,
+      members: season.members.map((member) => (
+        member.id === memberId
+          ? { ...member, draftedTeamId: team13.id, pickNumber: null, draftedRound: null, rating: '' }
+          : member
+      )),
+    }));
+  };
+
+  const unassignPreassignedMember = (memberId) => {
+    updateSeason((season) => ({
+      ...season,
+      members: season.members.map((member) => (
+        member.id === memberId && !member.pickNumber
+          ? { ...member, draftedTeamId: null, pickNumber: null, draftedRound: null, rating: '' }
+          : member
+      )),
+    }));
+  };
+
   const randomizeOrder = () => {
     if (activeSeason.locked) return;
     if (history.length && !window.confirm('Randomizing will clear current picks for this season. Continue?')) return;
     updateSeason((season) => ({
       ...season,
       draftOrder: shuffleTeams(season.teams),
-      members: season.members.map((member) => ({ ...member, draftedTeamId: null, pickNumber: null, draftedRound: null, rating: '' })),
+      members: season.members.map((member) => (
+        member.pickNumber ? { ...member, draftedTeamId: null, pickNumber: null, draftedRound: null, rating: '' } : member
+      )),
       history: [],
     }));
   };
@@ -374,7 +419,9 @@ export default function App() {
     if (!window.confirm('Reset all picks for this season? Members and teams will remain.')) return;
     updateSeason((season) => ({
       ...season,
-      members: season.members.map((member) => ({ ...member, draftedTeamId: null, pickNumber: null, draftedRound: null, rating: '' })),
+      members: season.members.map((member) => (
+        member.pickNumber ? { ...member, draftedTeamId: null, pickNumber: null, draftedRound: null, rating: '' } : member
+      )),
       history: [],
     }));
   };
@@ -548,6 +595,13 @@ export default function App() {
           forceSave={forceSave}
           settingsTab={settingsTab}
           setSettingsTab={setSettingsTab}
+          draftOrder={draftOrder}
+          teams={teams}
+          members={members}
+          availableMembers={availableMembers}
+          setDraftOrderPosition={setDraftOrderPosition}
+          assignMemberToTeam13={assignMemberToTeam13}
+          unassignPreassignedMember={unassignPreassignedMember}
           close={() => setSettingsOpen(false)}
         />
       )}
@@ -669,7 +723,7 @@ function SummaryStrip({ strongestTeam, weakestTeam, balancedTeam }) {
   );
 }
 
-function SettingsDrawer({ state, setState, activeSeason, newSeasonName, setNewSeasonName, addSeason, deleteSeason, renameSeason, toggleLock, forceSave, settingsTab, setSettingsTab, close }) {
+function SettingsDrawer({ state, setState, activeSeason, newSeasonName, setNewSeasonName, addSeason, deleteSeason, renameSeason, toggleLock, forceSave, settingsTab, setSettingsTab, draftOrder, teams, members, availableMembers, setDraftOrderPosition, assignMemberToTeam13, unassignPreassignedMember, close }) {
   return (
     <aside className="settingsDrawer">
       <div className="drawerTop"><h2>Settings</h2><button onClick={close}><X size={20} /></button></div>
@@ -701,12 +755,84 @@ function SettingsDrawer({ state, setState, activeSeason, newSeasonName, setNewSe
           <button className="secondaryBtn" onClick={toggleLock}>{activeSeason.locked ? <Unlock size={17} /> : <Lock size={17} />} {activeSeason.locked ? 'Unlock Draft' : 'Lock Draft'}</button>
           <button className="secondaryBtn" onClick={forceSave}><Save size={17} /> Save Now</button>
           <p>Scores are blank until a member is drafted. Their 2026 score is assigned by the round they are drafted in.</p>
+
+          <DraftOrderSetup teams={teams} draftOrder={draftOrder} setDraftOrderPosition={setDraftOrderPosition} />
+
+          <Team13Preassign
+            team13={teams[12]}
+            members={members}
+            availableMembers={availableMembers}
+            assignMemberToTeam13={assignMemberToTeam13}
+            unassignPreassignedMember={unassignPreassignedMember}
+          />
         </div>
       )}
       {settingsTab === 'prefs' && <div className="settingsStack"><p>Logo uploads and advanced preferences can be added later.</p></div>}
     </aside>
   );
 }
+
+
+function DraftOrderSetup({ teams, draftOrder, setDraftOrderPosition }) {
+  return (
+    <section className="drawerSection">
+      <h3>Initial Draft Order</h3>
+      <p>Use this when numbers are drawn from a hat. Assign each team to its first-round pick position before the draft begins.</p>
+      <div className="draftOrderSetup">
+        {draftOrder.map((team, index) => (
+          <div className="draftOrderSetupRow" key={team.id}>
+            <span>Pick {index + 1}</span>
+            <strong>{team.name}</strong>
+            <select value={index + 1} onChange={(event) => setDraftOrderPosition(team.id, Number(event.target.value))}>
+              {teams.map((_, pickIndex) => <option key={pickIndex + 1} value={pickIndex + 1}>Move to pick {pickIndex + 1}</option>)}
+            </select>
+          </div>
+        ))}
+      </div>
+    </section>
+  );
+}
+
+function Team13Preassign({ team13, members, availableMembers, assignMemberToTeam13, unassignPreassignedMember }) {
+  const [selectedMemberId, setSelectedMemberId] = useState('');
+  const assigned = members
+    .filter((member) => member.draftedTeamId === team13?.id && !member.pickNumber)
+    .sort((a, b) => a.name.localeCompare(b.name));
+
+  return (
+    <section className="drawerSection">
+      <h3>{team13?.name || 'Team 13'} Pre-Assignments</h3>
+      <p>Use this for members assigned to Team 13 before the live draft begins. These members will not consume draft picks.</p>
+      <div className="preassignControls">
+        <select value={selectedMemberId} onChange={(event) => setSelectedMemberId(event.target.value)}>
+          <option value="">Select available member</option>
+          {availableMembers.map((member) => <option key={member.id} value={member.id}>{member.name}</option>)}
+        </select>
+        <button
+          type="button"
+          className="goldBtn"
+          disabled={!selectedMemberId}
+          onClick={() => {
+            assignMemberToTeam13(selectedMemberId);
+            setSelectedMemberId('');
+          }}
+        >
+          Assign
+        </button>
+      </div>
+      <div className="preassignedList">
+        {assigned.length === 0 && <span>No pre-assigned members yet.</span>}
+        {assigned.map((member) => (
+          <div key={member.id}>
+            <b>{member.name}</b>
+            <button type="button" onClick={() => unassignPreassignedMember(member.id)}>Remove</button>
+          </div>
+        ))}
+      </div>
+    </section>
+  );
+}
+
 
 function TeamSetup({ teams, updateTeam }) {
   return (

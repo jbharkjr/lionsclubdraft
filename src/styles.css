@@ -299,3 +299,90 @@ label { display: grid; gap: 7px; color: #b9c8dc; text-transform: uppercase; font
   .topBar { justify-content: space-between; }
   .teamSetupGrid, .analyticsGrid { grid-template-columns: 1fr; }
 }
+
+
+.drawerSection {
+  border-top: 1px solid rgba(116,160,215,.22);
+  padding-top: 16px;
+  margin-top: 10px;
+}
+
+.drawerSection h3 {
+  color: #f2af00;
+  margin: 0 0 6px;
+  text-transform: uppercase;
+}
+
+.draftOrderSetup {
+  display: grid;
+  gap: 8px;
+  max-height: 300px;
+  overflow: auto;
+  padding-right: 4px;
+}
+
+.draftOrderSetupRow {
+  display: grid;
+  grid-template-columns: 70px 1fr 135px;
+  gap: 8px;
+  align-items: center;
+  border: 1px solid rgba(116,160,215,.24);
+  background: rgba(255,255,255,.05);
+  border-radius: 9px;
+  padding: 8px;
+}
+
+.draftOrderSetupRow span {
+  color: #f2af00;
+  font-weight: 900;
+}
+
+.draftOrderSetupRow strong {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.preassignControls {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 8px;
+  align-items: center;
+}
+
+.preassignedList {
+  display: grid;
+  gap: 7px;
+  margin-top: 10px;
+}
+
+.preassignedList > span {
+  color: #aebbd0;
+}
+
+.preassignedList div {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 8px;
+  align-items: center;
+  border: 1px solid rgba(116,160,215,.18);
+  background: rgba(255,255,255,.04);
+  border-radius: 8px;
+  padding: 8px;
+}
+
+.preassignedList button {
+  border: 0;
+  background: rgba(255,81,81,.18);
+  color: #ffb6b6;
+  border-radius: 7px;
+  padding: 6px 8px;
+}
+
+@media (max-width: 640px) {
+  .draftOrderSetupRow,
+  .preassignControls {
+    grid-template-columns: 1fr;
+  }
+}
