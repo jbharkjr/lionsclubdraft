@@ -335,3 +335,23 @@
     width: 100%;
   }
 }
+
+/* Dashboard available member search should stay compact, not stretch vertically */
+.availableDashboard .dashboardSearch {
+  flex: 0 0 auto;
+  width: min(360px, 100%);
+  max-width: 360px;
+  height: 42px;
+  min-height: 42px;
+  max-height: 42px;
+  padding: 0 12px;
+  margin: 0 0 16px;
+  align-self: flex-start;
+}
+
+.availableDashboard .dashboardSearch input {
+  height: 40px;
+  min-height: 40px;
+  padding: 0;
+  line-height: 40px;
+}
