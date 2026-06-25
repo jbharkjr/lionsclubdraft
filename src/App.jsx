@@ -59,7 +59,9 @@ export default function App() {
   const round = Math.floor(draftedCount / Math.max(liveDraftOrder.length, 1)) + 1;
   const liveDraftMemberCount = members.filter((member) => !member.draftedTeamId || member.pickNumber).length;
   const draftPercent = liveDraftMemberCount ? Math.round((draftedCount / liveDraftMemberCount) * 100) : 0;
-  const totalRounds = Math.ceil(liveDraftMemberCount / Math.max(liveDraftOrder.length, 1));
+  const autoTotalRounds = Math.ceil(liveDraftMemberCount / Math.max(liveDraftOrder.length, 1));
+  const totalRounds = Number(activeSeason.draftSettings?.manualRounds) || autoTotalRounds;
+  const timerDurationSeconds = Number(activeSeason.draftSettings?.timerSeconds) || 90;
   const lastPicks = [...history].sort((a, b) => b.pickNumber - a.pickNumber).slice(0, 4);
 
   const updateTimerState = (timer) => {
@@ -69,7 +71,28 @@ export default function App() {
     }));
   };
 
-  const timer = useDraftTimer(draftedCount, activeSeason.locked, activeSeason.timer, updateTimerState);
+  const timer = useDraftTimer(draftedCount, activeSeason.locked, activeSeason.timer, updateTimerState, timerDurationSeconds);
+
+  const updateDraftSettings = (field, value) => {
+    updateSeason((season) => ({
+      ...season,
+      draftSettings: {
+        timerSeconds: 90,
+        manualRounds: '',
+        ...(season.draftSettings || {}),
+        [field]: value,
+      },
+      timer: field === 'timerSeconds'
+        ? {
+            durationSeconds: Number(value) || 90,
+            remainingSeconds: Number(value) || 90,
+            startedAt: Date.now(),
+            running: season.timer?.running ?? true,
+            pickCount: draftedCount,
+          }
+        : season.timer,
+    }));
+  };
 
   const availableMembers = useMemo(() => {
     return members
@@ -375,6 +398,7 @@ export default function App() {
           members={members}
           availableMembers={availableMembers}
           setDraftOrderPosition={setDraftOrderPosition}
+          updateDraftSettings={updateDraftSettings}
           assignMemberToTeam13={assignMemberToTeam13}
           unassignPreassignedMember={unassignPreassignedMember}
           close={() => setSettingsOpen(false)}
