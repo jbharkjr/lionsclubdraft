@@ -84,7 +84,7 @@ export function MemberManager({
   };
 
   return (
-    <section className="card setupPanel">
+    <section className="card setupPanel memberManagerPanel">
       <div className="panelHeader">
         <h2>Member Manager</h2>
         <div className="actionRow">
