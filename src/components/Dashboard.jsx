@@ -15,8 +15,7 @@ function CurrentRoundOrderCard({ liveDraftOrder, draftedCount }) {
   const remainingOrder = order.slice(picksMadeInRound);
 
   return (
-    <section className="dashboardMetricCard orderMetric">
-      <div className="metricIcon blue"><Users size={28} /></div>
+    <section className="dashboardMetricCard orderMetric orderMetricNoIcon">
       <div className="metricContent">
         <span>Current Round Order</span>
         <div className="miniOrderDots">

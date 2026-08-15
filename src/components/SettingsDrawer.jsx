@@ -1,6 +1,6 @@
-import { Lock, Plus, Save, Unlock, X } from 'lucide-react';
+import { Lock, Plus, Save, Settings2, Unlock, X } from 'lucide-react';
 import { isLiveDraftTeam } from '../utils/draftLogic.js';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 
 export function SettingsDrawer({
   state,
@@ -114,23 +114,76 @@ function DraftSettingsControls({ activeSeason, updateDraftSettings }) {
 }
 
 function DraftOrderSetup({ teams, draftOrder, setDraftOrderPosition }) {
+  const [orderOpen, setOrderOpen] = useState(false);
   const liveTeams = teams.filter(isLiveDraftTeam);
+  const liveDraftOrder = draftOrder.filter(isLiveDraftTeam);
+
+  useEffect(() => {
+    if (!orderOpen) return undefined;
+
+    const handleKeyDown = (event) => {
+      if (event.key === 'Escape') setOrderOpen(false);
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [orderOpen]);
+
+  const assignTeamToPick = (pickIndex, teamId) => {
+    if (!teamId) return;
+    setDraftOrderPosition(teamId, pickIndex + 1);
+  };
 
   return (
-    <section className="drawerSection">
+    <section className="drawerSection draftOrderLauncher">
       <h3>Initial Draft Order</h3>
-      <p>Use this when numbers are drawn from a hat. Assign each team to its first-round pick position before the draft begins.</p>
-      <div className="draftOrderSetup">
-        {draftOrder.map((team, index) => (
-          <div className="draftOrderSetupRow" key={team.id}>
-            <span>Pick {index + 1}</span>
-            <strong>{team.name}</strong>
-            <select value={index + 1} onChange={(event) => setDraftOrderPosition(team.id, Number(event.target.value))}>
-              {liveTeams.map((_, pickIndex) => <option key={pickIndex + 1} value={pickIndex + 1}>Move to pick {pickIndex + 1}</option>)}
-            </select>
-          </div>
+      <p>Set the first-round order after the teams draw their numbers. The snake order will automatically reverse on the following round.</p>
+
+      <button type="button" className="secondaryBtn manageDraftOrderButton" onClick={() => setOrderOpen(true)}>
+        <Settings2 size={17} />
+        Manage Initial Draft Order
+      </button>
+
+      <div className="draftOrderPreview">
+        {liveDraftOrder.map((team, index) => (
+          <span key={team.id}><b>{index + 1}</b>{team.name}</span>
         ))}
       </div>
+
+      {orderOpen && (
+        <div className="draftOrderModalOverlay" onClick={() => setOrderOpen(false)} role="presentation">
+          <div className="draftOrderModal" onClick={(event) => event.stopPropagation()} role="dialog" aria-modal="true" aria-labelledby="draft-order-modal-title">
+            <div className="draftOrderModalHeader">
+              <div>
+                <span>Draft Setup</span>
+                <h2 id="draft-order-modal-title">Manage Initial Draft Order</h2>
+                <p>Select the team that owns each first-round pick. Changes save automatically.</p>
+              </div>
+              <button type="button" className="modalCloseButton" onClick={() => setOrderOpen(false)} aria-label="Close draft order manager">
+                <X size={22} />
+              </button>
+            </div>
+
+            <div className="draftOrderModalList">
+              {liveDraftOrder.map((team, index) => (
+                <label className="draftOrderPickRow" key={`pick-${index + 1}`}>
+                  <span>Pick {index + 1}</span>
+                  <select value={team.id} onChange={(event) => assignTeamToPick(index, event.target.value)}>
+                    {liveTeams.map((optionTeam) => (
+                      <option key={optionTeam.id} value={optionTeam.id}>{optionTeam.name}</option>
+                    ))}
+                  </select>
+                </label>
+              ))}
+            </div>
+
+            <div className="draftOrderModalFooter">
+              <small>Team 13 is excluded from the live draft.</small>
+              <button type="button" className="goldBtn" onClick={() => setOrderOpen(false)}>Done</button>
+            </div>
+          </div>
+        </div>
+      )}
     </section>
   );
 }
