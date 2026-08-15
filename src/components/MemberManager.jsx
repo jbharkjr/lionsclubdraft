@@ -27,10 +27,13 @@ export function MemberManager({
 }) {
   const [editingRows, setEditingRows] = useState({});
   const [rowDrafts, setRowDrafts] = useState({});
+  const [newMemberId, setNewMemberId] = useState(null);
 
   const filteredMembers = [...members]
-    .filter((member) => member.name.toLowerCase().includes(query.toLowerCase()))
+    .filter((member) => member.id === newMemberId || member.name.toLowerCase().includes(query.toLowerCase()))
     .sort((a, b) => {
+      if (a.id === newMemberId) return -1;
+      if (b.id === newMemberId) return 1;
       if (sort === 'rating') return Number(b.rating || 0) - Number(a.rating || 0);
       if (sort === 'team') return String(a.draftedTeamId || '').localeCompare(String(b.draftedTeamId || '')) || a.name.localeCompare(b.name);
       return a.name.localeCompare(b.name);
@@ -83,6 +86,41 @@ export function MemberManager({
     updateMemberProfile(member.id, nextDraft);
   };
 
+  const handleAddMember = () => {
+    const memberId = addMember();
+    if (!memberId) return;
+
+    setQuery('');
+    setSort('name');
+    setNewMemberId(memberId);
+    setEditingRows((prev) => ({ ...prev, [memberId]: true }));
+    setRowDrafts((prev) => ({
+      ...prev,
+      [memberId]: {
+        photo: '',
+        name: '',
+        rating: '',
+        draftedTeamId: '',
+        teamRole: '',
+      },
+    }));
+  };
+
+  const saveNewOrExisting = (member) => {
+    saveEdit(member);
+    if (member.id === newMemberId) setNewMemberId(null);
+  };
+
+  const cancelNewOrExisting = (member) => {
+    if (member.id === newMemberId) {
+      deleteMember(member.id, { skipConfirm: true });
+      setNewMemberId(null);
+      cancelEdit(member.id);
+      return;
+    }
+    cancelEdit(member.id);
+  };
+
   return (
     <section className="card setupPanel memberManagerPanel">
       <div className="panelHeader">
@@ -92,7 +130,7 @@ export function MemberManager({
           <button className="secondaryBtn" onClick={() => importRef.current?.click()}><FileUp size={17} /> Import CSV</button>
           <button className="secondaryBtn" onClick={exportMembers}><Download size={17} /> Export Members</button>
           <button className="secondaryBtn" onClick={exportRosters}><Download size={17} /> Export Rosters</button>
-          <button className="goldBtn" onClick={addMember}><Plus size={17} /> Add Member</button>
+          <button className="goldBtn" onClick={handleAddMember}><Plus size={17} /> Add Member</button>
         </div>
       </div>
       <div className="toolsRow">
@@ -149,8 +187,8 @@ export function MemberManager({
               </select>
               <div className="memberRowActions">
                 {isDrafted && !isEditing && <button className="secondaryBtn" onClick={() => beginEdit(member)}><Pencil size={16} /> Edit</button>}
-                {isEditing && <button className="goldBtn" onClick={() => saveEdit(member)}><Save size={16} /> Save</button>}
-                {isEditing && <button className="secondaryBtn" onClick={() => cancelEdit(member.id)}><X size={16} /> Cancel</button>}
+                {isEditing && <button className="goldBtn" onClick={() => saveNewOrExisting(member)}><Save size={16} /> Save</button>}
+                {isEditing && <button className="secondaryBtn" onClick={() => cancelNewOrExisting(member)}><X size={16} /> Cancel</button>}
                 {!isEditing && <button className="dangerBtn" onClick={() => deleteMember(member.id)}><Trash2 size={16} /></button>}
               </div>
             </article>
