@@ -355,3 +355,135 @@
   padding: 0;
   line-height: 40px;
 }
+
+
+/* Dashboard top metric cards — use the available card space more effectively */
+@media (min-width: 1251px) {
+  .dashboardMetrics {
+    align-items: stretch;
+  }
+
+  .dashboardMetricCard {
+    min-height: 190px;
+    grid-template-columns: 104px minmax(0, 1fr);
+    gap: 28px;
+    padding: 30px 34px;
+  }
+
+  .metricIcon {
+    width: 104px;
+    height: 104px;
+    border-radius: 18px;
+  }
+
+  .metricIcon svg {
+    width: 48px;
+    height: 48px;
+  }
+
+  .metricContent {
+    width: 100%;
+    min-width: 0;
+    align-self: center;
+  }
+
+  .metricContent > span {
+    font-size: 18px;
+    line-height: 1.15;
+    margin-bottom: 9px;
+  }
+
+  .metricContent > strong {
+    font-size: 50px;
+    line-height: .98;
+    margin: 5px 0 10px;
+  }
+
+  .metricContent > small {
+    display: block;
+    font-size: 22px;
+    line-height: 1.15;
+  }
+
+  .orderMetric {
+    grid-template-columns: 104px minmax(0, 1fr);
+  }
+
+  .orderMetric .metricContent {
+    display: grid;
+    grid-template-rows: auto 1fr auto;
+    align-self: stretch;
+    align-content: center;
+  }
+
+  .miniOrderDots {
+    width: 100%;
+    display: grid;
+    grid-template-columns: repeat(6, minmax(34px, 1fr));
+    gap: 10px 12px;
+    align-items: center;
+    margin: 7px 0 9px;
+  }
+
+  .miniOrderDots b {
+    width: 100%;
+    max-width: 48px;
+    aspect-ratio: 1;
+    height: auto;
+    justify-self: start;
+    font-size: 17px;
+  }
+
+  .metricTimerBar {
+    height: 16px;
+    margin-top: 18px;
+  }
+
+  .dashboardTimerControls {
+    margin-top: 13px;
+  }
+}
+
+@media (min-width: 1600px) {
+  .dashboardMetricCard {
+    min-height: 210px;
+    grid-template-columns: 116px minmax(0, 1fr);
+    padding: 34px 40px;
+  }
+
+  .metricIcon {
+    width: 116px;
+    height: 116px;
+  }
+
+  .metricIcon svg {
+    width: 54px;
+    height: 54px;
+  }
+
+  .metricContent > span {
+    font-size: 20px;
+  }
+
+  .metricContent > strong {
+    font-size: 56px;
+  }
+
+  .metricContent > small {
+    font-size: 24px;
+  }
+
+  .orderMetric {
+    grid-template-columns: 116px minmax(0, 1fr);
+  }
+
+  .miniOrderDots {
+    grid-template-columns: repeat(6, minmax(38px, 1fr));
+    gap: 12px 14px;
+  }
+
+  .miniOrderDots b {
+    max-width: 52px;
+    font-size: 18px;
+  }
+}
