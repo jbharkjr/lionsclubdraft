@@ -1,7 +1,7 @@
 import { useMemo, useRef, useState } from 'react';
 import { Analytics } from './components/Analytics.jsx';
 import { AvailableDraftList } from './components/AvailableDraftList.jsx';
-import { Dashboard } from './components/Dashboard.jsx';
+import { YahooDraftRoom } from './components/YahooDraftRoom.jsx';
 import { DraftHistory } from './components/DraftHistory.jsx';
 import { MemberManager } from './components/MemberManager.jsx';
 import { MobileDraftPager } from './components/MobileDraftPager.jsx';
@@ -23,6 +23,7 @@ import {
   shuffleTeams,
 } from './utils/draftLogic.js';
 import './dashboard.css';
+import './yahoo-draft.css';
 
 export default function App() {
   const { state, setState, syncStatus, forceSave } = useSupabaseDraftState();
@@ -373,27 +374,19 @@ export default function App() {
               activeSeason={activeSeason}
             />
 
-            <Dashboard
+            <YahooDraftRoom
               activeSeason={activeSeason}
               teams={teams}
               members={members}
               liveDraftOrder={liveDraftOrder}
               availableMembers={availableMembers}
-              query={query}
-              setQuery={setQuery}
               draftMember={draftMember}
               locked={activeSeason.locked}
-              setActivePanel={setActivePanel}
               currentTeam={currentTeam}
               round={round}
               draftedCount={draftedCount}
-              liveDraftMemberCount={liveDraftMemberCount}
               totalRounds={totalRounds}
-              draftPercent={draftPercent}
               lastPicks={lastPicks}
-              strongestTeam={strongestTeam}
-              weakestTeam={weakestTeam}
-              balancedTeam={balancedTeam}
               {...timer}
             />
           </>

@@ -1,0 +1,736 @@
+.yahooDraftRoom {
+  --yd-bg: #f7f7f8;
+  --yd-panel: #ffffff;
+  --yd-border: #d9d9de;
+  --yd-text: #1f1f25;
+  --yd-muted: #6b6b74;
+  --yd-purple: #6001d2;
+  --yd-purple-dark: #430096;
+  --yd-blue: #188fff;
+  --yd-green: #118a44;
+  --yd-gold: #f2af00;
+  color: var(--yd-text);
+  background: var(--yd-bg);
+  min-height: calc(100vh - 64px);
+  padding: 0;
+  overflow: hidden;
+}
+
+.yahooDraftHeader {
+  min-height: 92px;
+  padding: 14px 20px;
+  background: linear-gradient(115deg, #430096, #6001d2 58%, #7a24dc);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  border-bottom: 1px solid #3c0089;
+}
+
+.yahooLeagueBlock {
+  min-width: 260px;
+}
+
+.yahooEyebrow {
+  display: block;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: .11em;
+  font-weight: 900;
+  color: #ded0ff;
+}
+
+.yahooLeagueBlock h1 {
+  margin: 2px 0;
+  font-size: 25px;
+}
+
+.yahooLeagueBlock p {
+  margin: 0;
+  font-size: 12px;
+  color: #e8def9;
+}
+
+.yahooOnClock {
+  display: grid;
+  grid-template-columns: minmax(150px, 1fr) 170px auto;
+  align-items: center;
+  gap: 16px;
+  min-width: min(640px, 60vw);
+}
+
+.yahooOnClock > div:first-child span,
+.yahooOnClock > div:first-child small {
+  display: block;
+}
+
+.yahooOnClock > div:first-child span {
+  color: #d7c4f5;
+  font-size: 11px;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.yahooOnClock > div:first-child strong {
+  display: block;
+  font-size: 22px;
+  line-height: 1.1;
+}
+
+.yahooOnClock > div:first-child small {
+  color: #eee6fb;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.yahooTimer {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  align-items: center;
+  gap: 8px;
+}
+
+.yahooTimer strong {
+  font-size: 31px;
+}
+
+.yahooTimerTrack {
+  grid-column: 1 / -1;
+  height: 5px;
+  background: rgba(255,255,255,.24);
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+.yahooTimerTrack span {
+  display: block;
+  height: 100%;
+  background: #fff;
+}
+
+.yahooTimerActions {
+  display: flex;
+  gap: 7px;
+}
+
+.yahooTimerActions button {
+  border: 1px solid rgba(255,255,255,.45);
+  background: rgba(255,255,255,.11);
+  color: #fff;
+  border-radius: 4px;
+  padding: 7px 10px;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.yahooRoundStrip {
+  height: 76px;
+  display: grid;
+  grid-template-columns: 115px 1fr;
+  background: #fff;
+  border-bottom: 1px solid var(--yd-border);
+}
+
+.yahooRoundLabel {
+  border-right: 1px solid var(--yd-border);
+  padding: 14px 16px;
+  display: grid;
+  align-content: center;
+}
+
+.yahooRoundLabel span {
+  color: var(--yd-purple);
+  font-weight: 900;
+}
+
+.yahooRoundLabel small {
+  color: var(--yd-muted);
+}
+
+.yahooOrderTrack {
+  display: grid;
+  grid-template-columns: repeat(12, minmax(72px, 1fr));
+  overflow: hidden;
+}
+
+.yahooOrderTeam {
+  min-width: 0;
+  border-right: 1px solid #ececf0;
+  padding: 8px 6px;
+  display: grid;
+  align-content: center;
+  justify-items: center;
+  gap: 2px;
+  background: #fff;
+}
+
+.yahooOrderTeam b {
+  width: 27px;
+  height: 27px;
+  border-radius: 50%;
+  background: #eeeeF2;
+  display: grid;
+  place-items: center;
+  font-size: 12px;
+}
+
+.yahooOrderTeam span {
+  width: 100%;
+  color: #55555e;
+  font-size: 10px;
+  font-weight: 800;
+  text-align: center;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.yahooOrderTeam.past {
+  opacity: .38;
+  background: #f5f5f7;
+}
+
+.yahooOrderTeam.current {
+  background: #f3eafd;
+  box-shadow: inset 0 -4px 0 var(--yd-purple);
+}
+
+.yahooOrderTeam.current b {
+  background: var(--yd-purple);
+  color: white;
+}
+
+.yahooDraftGrid {
+  height: calc(100vh - 232px);
+  display: grid;
+  grid-template-columns: 220px minmax(530px, 1fr) 260px;
+  background: var(--yd-bg);
+}
+
+.yahooRecentPane,
+.yahooQueuePane,
+.yahooPlayerPane {
+  min-height: 0;
+  background: var(--yd-panel);
+}
+
+.yahooRecentPane {
+  border-right: 1px solid var(--yd-border);
+  overflow-y: auto;
+}
+
+.yahooQueuePane {
+  border-left: 1px solid var(--yd-border);
+  overflow: hidden;
+}
+
+.yahooPlayerPane {
+  position: relative;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.yahooPaneTitle {
+  padding: 13px 12px 10px;
+  border-bottom: 1px solid var(--yd-border);
+}
+
+.yahooPaneTitle span,
+.yahooPaneTitle small {
+  display: block;
+}
+
+.yahooPaneTitle span {
+  font-size: 13px;
+  font-weight: 900;
+}
+
+.yahooPaneTitle small {
+  color: var(--yd-muted);
+  font-size: 10px;
+}
+
+.yahooRecentList {
+  max-height: 220px;
+  overflow-y: auto;
+}
+
+.yahooRecentPick {
+  display: grid;
+  grid-template-columns: 32px 1fr 30px;
+  gap: 8px;
+  align-items: center;
+  padding: 9px 10px;
+  border-bottom: 1px solid #eeeeF2;
+}
+
+.yahooRecentPick > b {
+  width: 27px;
+  height: 27px;
+  border-radius: 50%;
+  background: #eeeeF2;
+  display: grid;
+  place-items: center;
+  font-size: 11px;
+}
+
+.yahooRecentPick div {
+  min-width: 0;
+}
+
+.yahooRecentPick strong,
+.yahooRecentPick span {
+  display: block;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.yahooRecentPick strong {
+  font-size: 12px;
+}
+
+.yahooRecentPick span {
+  color: var(--yd-muted);
+  font-size: 10px;
+}
+
+.yahooRecentPick em {
+  font-style: normal;
+  text-align: right;
+  font-weight: 900;
+  font-size: 11px;
+}
+
+.yahooRosterHeading {
+  margin-top: 8px;
+  border-top: 1px solid var(--yd-border);
+}
+
+.yahooCompactRoster {
+  overflow-y: auto;
+}
+
+.yahooCompactRoster > div {
+  display: grid;
+  grid-template-columns: 1fr 32px;
+  gap: 6px;
+  padding: 7px 10px;
+  border-bottom: 1px solid #eeeeF2;
+  font-size: 11px;
+}
+
+.yahooCompactRoster b {
+  text-align: right;
+}
+
+.yahooTabs {
+  height: 43px;
+  display: flex;
+  align-items: stretch;
+  border-bottom: 1px solid var(--yd-border);
+  background: #fff;
+}
+
+.yahooTabs button {
+  border: 0;
+  border-bottom: 3px solid transparent;
+  background: transparent;
+  color: #55555e;
+  padding: 0 18px;
+  font-weight: 800;
+  font-size: 12px;
+}
+
+.yahooTabs button.active {
+  color: var(--yd-purple);
+  border-bottom-color: var(--yd-purple);
+}
+
+.yahooPlayerTools {
+  height: 54px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 12px;
+  border-bottom: 1px solid var(--yd-border);
+}
+
+.yahooSearch {
+  flex: 1;
+  max-width: 460px;
+  height: 36px;
+  border: 1px solid #cfcfd5;
+  border-radius: 3px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 9px;
+  color: var(--yd-muted);
+}
+
+.yahooSearch input {
+  height: 34px;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  color: var(--yd-text);
+  padding: 0;
+}
+
+.yahooSort {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--yd-muted);
+  font-size: 11px;
+  font-weight: 800;
+}
+
+.yahooSort select {
+  min-width: 145px;
+  height: 34px;
+  border: 1px solid #cfcfd5;
+  border-radius: 3px;
+  background: #fff;
+  color: var(--yd-text);
+  padding: 0 28px 0 8px;
+  appearance: none;
+}
+
+.yahooSort svg {
+  position: absolute;
+  right: 7px;
+  pointer-events: none;
+}
+
+.yahooTableHeader,
+.yahooPlayerRow {
+  display: grid;
+  grid-template-columns: 36px minmax(210px, 1fr) 65px 82px 72px;
+  gap: 8px;
+  align-items: center;
+}
+
+.yahooTableHeader {
+  height: 34px;
+  padding: 0 10px;
+  background: #f5f5f7;
+  border-bottom: 1px solid var(--yd-border);
+  color: #6b6b74;
+  font-size: 10px;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.yahooPlayerList {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+}
+
+.yahooPlayerRow {
+  min-height: 48px;
+  padding: 5px 10px;
+  border-bottom: 1px solid #eeeeF2;
+  cursor: pointer;
+  background: #fff;
+}
+
+.yahooPlayerRow:hover {
+  background: #f8f4fd;
+}
+
+.yahooPlayerRow.selected {
+  background: #f1e8fb;
+  box-shadow: inset 3px 0 0 var(--yd-purple);
+}
+
+.yahooStar {
+  width: 28px;
+  height: 28px;
+  border: 0;
+  background: transparent;
+  color: #a4a4aa;
+  display: grid;
+  place-items: center;
+}
+
+.yahooStar.queued {
+  color: var(--yd-gold);
+}
+
+.yahooMemberIdentity {
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.yahooMemberAvatar {
+  width: 31px;
+  height: 31px;
+  border-radius: 50%;
+  overflow: hidden;
+  background: #e8e8ec;
+  color: #55555e;
+  display: grid;
+  place-items: center;
+  font-size: 12px;
+  font-weight: 900;
+}
+
+.yahooMemberAvatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.yahooMemberIdentity strong {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.yahooAvailableBadge {
+  color: var(--yd-green);
+  font-size: 11px;
+  font-weight: 800;
+}
+
+.yahooDraftButton {
+  border: 0;
+  border-radius: 3px;
+  background: var(--yd-purple);
+  color: #fff;
+  padding: 7px 10px;
+  font-size: 11px;
+  font-weight: 900;
+}
+
+.yahooDraftButton:hover:not(:disabled),
+.yahooSelectedBar > button:last-child:hover:not(:disabled) {
+  background: var(--yd-purple-dark);
+}
+
+.yahooSelectedBar {
+  position: absolute;
+  left: 12px;
+  right: 12px;
+  bottom: 10px;
+  min-height: 58px;
+  border: 1px solid #c9b2e4;
+  background: #fff;
+  box-shadow: 0 4px 18px rgba(28, 0, 60, .18);
+  display: grid;
+  grid-template-columns: 26px 1fr auto auto;
+  gap: 12px;
+  align-items: center;
+  padding: 9px 12px;
+}
+
+.yahooSelectedClose {
+  border: 0;
+  background: transparent;
+  color: var(--yd-muted);
+}
+
+.yahooSelectedBar div span {
+  display: block;
+  color: var(--yd-muted);
+  font-size: 9px;
+  text-transform: uppercase;
+  font-weight: 900;
+}
+
+.yahooSelectedBar div strong {
+  font-size: 13px;
+}
+
+.yahooSelectedBar > b {
+  font-size: 11px;
+}
+
+.yahooSelectedBar > button:last-child {
+  border: 0;
+  background: var(--yd-purple);
+  color: #fff;
+  border-radius: 3px;
+  padding: 8px 12px;
+  font-weight: 900;
+  font-size: 11px;
+}
+
+.yahooRightTabs button {
+  flex: 1;
+  padding: 0 8px;
+}
+
+.yahooQueueList,
+.yahooTeamList {
+  height: calc(100% - 43px);
+  overflow-y: auto;
+}
+
+.yahooQueueEmpty {
+  min-height: 210px;
+  display: grid;
+  place-items: center;
+  align-content: center;
+  gap: 8px;
+  padding: 20px;
+  text-align: center;
+  color: var(--yd-muted);
+}
+
+.yahooQueueEmpty svg {
+  color: var(--yd-gold);
+}
+
+.yahooQueueEmpty strong,
+.yahooQueueEmpty span {
+  display: block;
+}
+
+.yahooQueueEmpty strong {
+  color: var(--yd-text);
+  font-size: 13px;
+}
+
+.yahooQueueEmpty span {
+  font-size: 11px;
+  line-height: 1.4;
+}
+
+.yahooQueueRow {
+  min-height: 43px;
+  display: grid;
+  grid-template-columns: 25px 1fr 30px 25px;
+  gap: 6px;
+  align-items: center;
+  padding: 6px 8px;
+  border-bottom: 1px solid #eeeeF2;
+  font-size: 11px;
+}
+
+.yahooQueueRow > b {
+  color: var(--yd-purple);
+}
+
+.yahooQueueRow > em {
+  font-style: normal;
+  text-align: right;
+  font-weight: 900;
+}
+
+.yahooQueueRow button {
+  border: 0;
+  background: transparent;
+  color: #777780;
+}
+
+.yahooTeamList > div {
+  min-height: 52px;
+  padding: 8px 10px;
+  border-bottom: 1px solid #eeeeF2;
+  display: grid;
+  grid-template-columns: 1fr 30px;
+  gap: 2px 8px;
+}
+
+.yahooTeamList > div.current {
+  background: #f3eafd;
+  box-shadow: inset 3px 0 0 var(--yd-purple);
+}
+
+.yahooTeamList span {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-weight: 800;
+  font-size: 11px;
+}
+
+.yahooTeamList b {
+  text-align: right;
+  font-size: 11px;
+}
+
+.yahooTeamList small {
+  grid-column: 1 / -1;
+  color: var(--yd-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-size: 10px;
+}
+
+.yahooResults {
+  flex: 1;
+  overflow-y: auto;
+}
+
+.yahooResultsHeader,
+.yahooResultRow {
+  display: grid;
+  grid-template-columns: 60px 110px 1fr 65px;
+  gap: 8px;
+  align-items: center;
+  padding: 0 12px;
+}
+
+.yahooResultsHeader {
+  height: 34px;
+  background: #f5f5f7;
+  color: var(--yd-muted);
+  font-size: 10px;
+  font-weight: 900;
+  text-transform: uppercase;
+  border-bottom: 1px solid var(--yd-border);
+}
+
+.yahooResultRow {
+  min-height: 43px;
+  border-bottom: 1px solid #eeeeF2;
+  font-size: 11px;
+}
+
+.yahooResultRow em {
+  font-style: normal;
+  font-weight: 900;
+}
+
+.yahooEmpty {
+  color: var(--yd-muted);
+  font-size: 11px;
+  padding: 14px 10px;
+}
+
+.yahooPlayerEmpty {
+  text-align: center;
+  padding: 35px;
+}
+
+@media (max-width: 1200px) {
+  .yahooDraftGrid {
+    grid-template-columns: 190px minmax(460px, 1fr) 220px;
+  }
+
+  .yahooDraftHeader {
+    gap: 12px;
+  }
+
+  .yahooOnClock {
+    min-width: 560px;
+  }
+}
+
+@media (max-width: 800px) {
+  .yahooDraftRoom {
+    display: none;
+  }
+}
