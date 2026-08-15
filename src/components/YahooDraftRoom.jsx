@@ -51,6 +51,7 @@ export function YahooDraftRoom({
   const [rightTab, setRightTab] = useState('queue');
   const [selectedId, setSelectedId] = useState(null);
   const [queue, setQueue] = useState([]);
+  const [selectedTeamId, setSelectedTeamId] = useState(null);
 
   const orderInfo = currentRoundOrder(liveDraftOrder, draftedCount);
   const currentRoster = useMemo(
@@ -58,6 +59,14 @@ export function YahooDraftRoom({
       .filter((member) => member.draftedTeamId === currentTeam?.id)
       .sort((a, b) => (a.pickNumber || 9999) - (b.pickNumber || 9999) || a.name.localeCompare(b.name)),
     [members, currentTeam],
+  );
+
+  const selectedTeam = teams.find((team) => team.id === selectedTeamId) || null;
+  const selectedTeamRoster = useMemo(
+    () => members
+      .filter((member) => member.draftedTeamId === selectedTeamId)
+      .sort((a, b) => (a.pickNumber || 9999) - (b.pickNumber || 9999) || a.name.localeCompare(b.name)),
+    [members, selectedTeamId],
   );
 
   const filteredMembers = useMemo(() => {
@@ -327,16 +336,42 @@ export function YahooDraftRoom({
                 </div>
               ))}
             </div>
+          ) : selectedTeam ? (
+            <div className="yahooTeamRosterView">
+              <button type="button" className="yahooBackTeams" onClick={() => setSelectedTeamId(null)}>
+                ← All Teams
+              </button>
+              <div className="yahooTeamRosterTitle">
+                <strong>{selectedTeam.name}</strong>
+                <span>{leadership(selectedTeam) || 'Captain / Lt. not set'}</span>
+                <small>{selectedTeamRoster.length} drafted members</small>
+              </div>
+              <div className="yahooTeamRosterMembers">
+                {selectedTeamRoster.map((member) => (
+                  <div key={member.id}>
+                    <b>{member.pickNumber || '—'}</b>
+                    <span>{member.name}</span>
+                    <em>{member.rating || '—'}</em>
+                  </div>
+                ))}
+                {!selectedTeamRoster.length && <div className="yahooEmpty">No members drafted to this team yet.</div>}
+              </div>
+            </div>
           ) : (
             <div className="yahooTeamList">
               {teams.map((team) => {
                 const roster = members.filter((member) => member.draftedTeamId === team.id);
                 return (
-                  <div key={team.id} className={team.id === currentTeam?.id ? 'current' : ''}>
+                  <button
+                    type="button"
+                    key={team.id}
+                    className={team.id === currentTeam?.id ? 'current' : ''}
+                    onClick={() => setSelectedTeamId(team.id)}
+                  >
                     <span><Users size={15} /> {team.name}</span>
                     <b>{roster.length}</b>
                     <small>{leadership(team)}</small>
-                  </div>
+                  </button>
                 );
               })}
             </div>
