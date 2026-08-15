@@ -1265,3 +1265,194 @@ label { display: grid; gap: 7px; color: #b9c8dc; text-transform: uppercase; font
 }
 
 .analyticsTeamNameButton:hover { color: #f2af00; }
+
+
+/* Settings drawer usability */
+.settingsDrawer {
+  overflow-y: auto;
+  overflow-x: hidden;
+  overscroll-behavior: contain;
+  scrollbar-gutter: stable;
+  padding-bottom: 56px;
+}
+
+.settingsStack {
+  min-height: min-content;
+}
+
+.draftOrderLauncher {
+  display: grid;
+  gap: 12px;
+}
+
+.manageDraftOrderButton {
+  width: 100%;
+  justify-content: center;
+  min-height: 46px;
+}
+
+.draftOrderPreview {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 7px;
+}
+
+.draftOrderPreview span {
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  border: 1px solid rgba(116,160,215,.18);
+  background: rgba(255,255,255,.04);
+  border-radius: 8px;
+  padding: 7px 8px;
+  color: #d8e5f5;
+  font-size: 11px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.draftOrderPreview b {
+  flex: 0 0 auto;
+  color: #f2af00;
+}
+
+.draftOrderModalOverlay {
+  position: fixed;
+  inset: 0;
+  z-index: 120;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+  background: rgba(1,10,22,.76);
+  backdrop-filter: blur(5px);
+}
+
+.draftOrderModal {
+  width: min(720px, calc(100vw - 32px));
+  max-height: min(820px, calc(100dvh - 48px));
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr) auto;
+  overflow: hidden;
+  border: 1px solid rgba(116,160,215,.34);
+  border-radius: 18px;
+  background: linear-gradient(180deg, #0a2c53, #061a33);
+  box-shadow: 0 28px 90px rgba(0,0,0,.55);
+}
+
+.draftOrderModalHeader {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 18px;
+  padding: 22px 24px 18px;
+  border-bottom: 1px solid rgba(116,160,215,.2);
+}
+
+.draftOrderModalHeader > div {
+  min-width: 0;
+}
+
+.draftOrderModalHeader span {
+  display: block;
+  color: #f2af00;
+  text-transform: uppercase;
+  letter-spacing: .1em;
+  font-size: 11px;
+  font-weight: 900;
+}
+
+.draftOrderModalHeader h2 {
+  margin: 4px 0 5px;
+  font-size: 24px;
+}
+
+.draftOrderModalHeader p {
+  margin: 0;
+  color: #b7c7da;
+  font-size: 13px;
+}
+
+.draftOrderModalHeader .modalCloseButton {
+  flex: 0 0 auto;
+  width: 38px;
+  height: 38px;
+  border: 1px solid rgba(116,160,215,.25);
+  border-radius: 9px;
+  background: rgba(255,255,255,.05);
+  color: #fff;
+  display: grid;
+  place-items: center;
+}
+
+.draftOrderModalList {
+  min-height: 0;
+  overflow-y: auto;
+  display: grid;
+  gap: 9px;
+  padding: 18px 24px;
+  scrollbar-gutter: stable;
+}
+
+.draftOrderPickRow {
+  display: grid;
+  grid-template-columns: 110px minmax(0, 1fr);
+  gap: 14px;
+  align-items: center;
+  border: 1px solid rgba(116,160,215,.2);
+  border-radius: 11px;
+  background: rgba(255,255,255,.045);
+  padding: 10px 12px;
+}
+
+.draftOrderPickRow > span {
+  color: #f2af00;
+  font-size: 14px;
+  font-weight: 1000;
+}
+
+.draftOrderPickRow select {
+  min-width: 0;
+  margin: 0;
+}
+
+.draftOrderModalFooter {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  padding: 14px 24px 18px;
+  border-top: 1px solid rgba(116,160,215,.2);
+}
+
+.draftOrderModalFooter small {
+  color: #9fb2ca;
+}
+
+@media (max-width: 640px) {
+  .draftOrderPreview {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .draftOrderModalOverlay {
+    padding: 10px;
+  }
+
+  .draftOrderModal {
+    width: 100%;
+    max-height: calc(100dvh - 20px);
+  }
+
+  .draftOrderModalHeader,
+  .draftOrderModalList,
+  .draftOrderModalFooter {
+    padding-left: 14px;
+    padding-right: 14px;
+  }
+
+  .draftOrderPickRow {
+    grid-template-columns: 78px minmax(0, 1fr);
+    gap: 8px;
+  }
+}

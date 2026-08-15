@@ -357,7 +357,7 @@
 }
 
 
-/* Dashboard top metric cards — use the available card space more effectively */
+/* Top metric cards: fuller use of available space */
 @media (min-width: 1251px) {
   .dashboardMetrics {
     align-items: stretch;
@@ -405,42 +405,47 @@
     line-height: 1.15;
   }
 
-  .orderMetric {
-    grid-template-columns: 104px minmax(0, 1fr);
-  }
-
-  .orderMetric .metricContent {
-    display: grid;
-    grid-template-rows: auto 1fr auto;
-    align-self: stretch;
-    align-content: center;
-  }
-
-  .miniOrderDots {
-    width: 100%;
-    display: grid;
-    grid-template-columns: repeat(6, minmax(34px, 1fr));
-    gap: 10px 12px;
-    align-items: center;
-    margin: 7px 0 9px;
-  }
-
-  .miniOrderDots b {
-    width: 100%;
-    max-width: 48px;
-    aspect-ratio: 1;
-    height: auto;
-    justify-self: start;
-    font-size: 17px;
-  }
-
   .metricTimerBar {
     height: 16px;
     margin-top: 18px;
   }
 
-  .dashboardTimerControls {
-    margin-top: 13px;
+  .orderMetricNoIcon {
+    display: block;
+    padding: 28px 34px;
+  }
+
+  .orderMetricNoIcon .metricContent {
+    height: 100%;
+    display: grid;
+    grid-template-rows: auto 1fr auto;
+    align-content: center;
+  }
+
+  .orderMetricNoIcon .metricContent > span {
+    font-size: 22px;
+  }
+
+  .orderMetricNoIcon .miniOrderDots {
+    width: 100%;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    align-content: center;
+    gap: 12px;
+    margin: 10px 0;
+  }
+
+  .orderMetricNoIcon .miniOrderDots b {
+    flex: 0 0 46px;
+    width: 46px;
+    height: 46px;
+    max-width: none;
+    font-size: 18px;
+  }
+
+  .orderMetricNoIcon .metricContent > small {
+    font-size: 20px;
   }
 }
 
@@ -473,17 +478,22 @@
     font-size: 24px;
   }
 
-  .orderMetric {
-    grid-template-columns: 116px minmax(0, 1fr);
+  .orderMetricNoIcon {
+    padding: 30px 40px;
   }
 
-  .miniOrderDots {
-    grid-template-columns: repeat(6, minmax(38px, 1fr));
-    gap: 12px 14px;
+  .orderMetricNoIcon .metricContent > span {
+    font-size: 24px;
   }
 
-  .miniOrderDots b {
-    max-width: 52px;
-    font-size: 18px;
+  .orderMetricNoIcon .miniOrderDots {
+    gap: 14px;
+  }
+
+  .orderMetricNoIcon .miniOrderDots b {
+    flex-basis: 52px;
+    width: 52px;
+    height: 52px;
+    font-size: 20px;
   }
 }
