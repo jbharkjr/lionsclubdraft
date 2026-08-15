@@ -182,8 +182,8 @@ export default function App() {
     });
   };
 
-  const deleteMember = (id) => {
-    if (!window.confirm('Delete this member from the active season?')) return;
+  const deleteMember = (id, options = {}) => {
+    if (!options.skipConfirm && !window.confirm('Delete this member from the active season?')) return;
     updateSeason((season) => ({
       ...season,
       members: season.members.filter((member) => member.id !== id),
@@ -239,13 +239,14 @@ export default function App() {
   const toggleLock = () => updateSeason((season) => ({ ...season, locked: !season.locked }));
 
   const addMember = () => {
+    const memberId = crypto.randomUUID?.() || `member-${Date.now()}`;
+
     updateSeason((season) => ({
       ...season,
       members: [
-        ...season.members,
         {
-          id: crypto.randomUUID?.() || `member-${Date.now()}`,
-          name: `New Member ${season.members.length + 1}`,
+          id: memberId,
+          name: '',
           rating: '',
           note: '',
           photo: '',
@@ -255,8 +256,11 @@ export default function App() {
           pickNumber: null,
           draftedRound: null,
         },
+        ...season.members,
       ],
     }));
+
+    return memberId;
   };
 
   const handleImport = async (event) => {
